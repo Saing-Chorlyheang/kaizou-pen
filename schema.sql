@@ -215,7 +215,46 @@ create policy "auth delete product images"
   using (bucket_id = 'product-images');
 
 -- ------------------------------------------------------------
--- 7. SEED DATA (optional — comment out if you want to start empty)
+-- 7. PAYMENTS TABLE (payment screenshot proof per order)
+-- ------------------------------------------------------------
+create table if not exists public.payments (
+  id              uuid primary key default gen_random_uuid(),
+  order_id        uuid references public.orders(id) on delete cascade,
+  screenshot_url  text not null,
+  created_at      timestamptz default now()
+);
+
+alter table public.payments enable row level security;
+
+drop policy if exists "anyone can submit payment" on public.payments;
+create policy "anyone can submit payment"
+  on public.payments for insert
+  with check (true);
+
+drop policy if exists "auth view payments" on public.payments;
+create policy "auth view payments"
+  on public.payments for select to authenticated
+  using (true);
+
+-- ------------------------------------------------------------
+-- 8. STORAGE BUCKET FOR PAYMENT SCREENSHOTS
+-- ------------------------------------------------------------
+insert into storage.buckets (id, name, public)
+values ('payment-screenshots', 'payment-screenshots', true)
+on conflict (id) do nothing;
+
+drop policy if exists "anyone upload payment screenshot" on storage.objects;
+create policy "anyone upload payment screenshot"
+  on storage.objects for insert
+  with check (bucket_id = 'payment-screenshots');
+
+drop policy if exists "public read payment screenshots" on storage.objects;
+create policy "public read payment screenshots"
+  on storage.objects for select
+  using (bucket_id = 'payment-screenshots');
+
+-- ------------------------------------------------------------
+-- 9. SEED DATA (optional — comment out if you want to start empty)
 -- ------------------------------------------------------------
 insert into public.products (name, spec, description, price, tag, cap_color, sort_order)
 values

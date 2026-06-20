@@ -497,14 +497,15 @@ checkoutSubmit.addEventListener('click', async () => {
     id: i.id, name: i.name, price: i.price, qty: i.qty
   }));
   const subtotal = items.reduce((s, i) => s + i.qty * i.price, 0);
+  const notesValue = coNotes.value.trim();
 
   checkoutSubmit.disabled = true;
   checkoutSubmit.querySelector('span').textContent = 'Placing order…';
 
-  const notesValue = coNotes.value.trim();
+  let savedOrderId = null;
 
   if (window.SUPABASE_CONFIGURED) {
-    const { error } = await window.sb.from('orders').insert({
+    const { data, error } = await window.sb.from('orders').insert({
       customer_name:   name,
       contact:         contact,
       address:         address,
@@ -512,7 +513,8 @@ checkoutSubmit.addEventListener('click', async () => {
       items:           items,
       subtotal:        subtotal,
       notes:           notesValue || null,
-    });
+      status:          'awaiting_payment',
+    }).select('id').single();
 
     if (error) {
       console.error('Order failed:', error);
@@ -521,27 +523,10 @@ checkoutSubmit.addEventListener('click', async () => {
       checkoutSubmit.querySelector('span').textContent = 'Place order';
       return;
     }
+    savedOrderId = data.id;
   }
 
-  // Facebook Messenger handoff — opens m.me with the order pre-typed
-  const fbPage = (window.FB_PAGE_USERNAME || '').trim();
-  if (fbPage) {
-    const msg = buildOrderMessage({
-      name, contact, address, shipping: shippingMethod,
-      items, subtotal, notes: notesValue,
-    });
-    const url = `https://m.me/${encodeURIComponent(fbPage)}?text=${encodeURIComponent(msg)}`;
-    // Open in a new tab. On mobile this opens the Messenger app.
-    window.open(url, '_blank', 'noopener,noreferrer');
-    showToast(`Order saved — tap Send in Messenger to confirm ✓`);
-  } else {
-    showToast(`Order placed — $${subtotal.toLocaleString()} ✓`);
-  }
-
-  cart.clear();
-  renderCart();
-
-  // Reset the form
+  // Reset form
   coName.value = '';
   coContact.value = '';
   coAddress.value = '';
@@ -550,10 +535,116 @@ checkoutSubmit.addEventListener('click', async () => {
   shipOtherWrap.hidden = true;
   const first = shipOptions.querySelector('input[name="ship"]');
   if (first) first.checked = true;
-
   checkoutSubmit.disabled = false;
   checkoutSubmit.querySelector('span').textContent = 'Place order';
+
   closeCheckout();
+  openPaymentModal(savedOrderId, subtotal);
+});
+
+// ============ PAYMENT MODAL ============
+const ABA_PAYWAY_URL = 'https://link.payway.com.kh/wS464008C';
+
+const paymentOverlay  = document.getElementById('paymentOverlay');
+const paymentQrCanvas = document.getElementById('paymentQrCanvas');
+const paymentAmountLabel = document.getElementById('paymentAmountLabel');
+const paymentScreenshot  = document.getElementById('paymentScreenshot');
+const paymentUploadLabel = document.getElementById('paymentUploadLabel');
+const paymentUploadText  = document.getElementById('paymentUploadText');
+const paymentPreview     = document.getElementById('paymentPreview');
+const paymentError       = document.getElementById('paymentError');
+const paymentSubmit      = document.getElementById('paymentSubmit');
+
+let _pendingOrderId = null;
+
+function openPaymentModal(orderId, subtotal) {
+  _pendingOrderId = orderId;
+  paymentAmountLabel.textContent = `Amount: $${subtotal.toLocaleString()} · ABA PayWay`;
+  paymentError.textContent = '';
+  paymentPreview.hidden = true;
+  paymentPreview.src = '';
+  paymentUploadText.textContent = 'Choose screenshot';
+  paymentScreenshot.value = '';
+  paymentSubmit.disabled = true;
+  paymentOverlay.hidden = false;
+  document.body.style.overflow = 'hidden';
+
+  // Generate QR code
+  if (window.QRCode) {
+    QRCode.toCanvas(paymentQrCanvas, ABA_PAYWAY_URL, {
+      width: 220,
+      margin: 2,
+      color: { dark: '#08080f', light: '#ffffff' },
+    });
+  }
+}
+
+function closePaymentModal() {
+  paymentOverlay.hidden = true;
+  document.body.style.overflow = '';
+}
+
+// Preview selected screenshot
+paymentScreenshot.addEventListener('change', () => {
+  const file = paymentScreenshot.files[0];
+  if (!file) return;
+  paymentUploadText.textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    paymentPreview.src = e.target.result;
+    paymentPreview.hidden = false;
+  };
+  reader.readAsDataURL(file);
+  paymentSubmit.disabled = false;
+});
+
+paymentSubmit.addEventListener('click', async () => {
+  const file = paymentScreenshot.files[0];
+  if (!file) { paymentError.textContent = 'Please choose your payment screenshot.'; return; }
+
+  paymentError.textContent = '';
+  paymentSubmit.disabled = true;
+  paymentSubmit.querySelector('span').textContent = 'Uploading…';
+
+  try {
+    let screenshotUrl = '(no-storage)';
+
+    if (window.SUPABASE_CONFIGURED) {
+      const ext = file.name.split('.').pop();
+      const path = `${_pendingOrderId || Date.now()}-${Date.now()}.${ext}`;
+
+      const { error: upErr } = await window.sb.storage
+        .from('payment-screenshots')
+        .upload(path, file, { upsert: false });
+
+      if (upErr) throw upErr;
+
+      const { data: urlData } = window.sb.storage
+        .from('payment-screenshots')
+        .getPublicUrl(path);
+
+      screenshotUrl = urlData.publicUrl;
+
+      // Save to payments table
+      const { error: payErr } = await window.sb.from('payments').insert({
+        order_id:       _pendingOrderId,
+        screenshot_url: screenshotUrl,
+      });
+      if (payErr) throw payErr;
+    }
+
+    // Clear cart now that payment proof submitted
+    cart.clear();
+    renderCart();
+
+    closePaymentModal();
+    showToast('Payment proof submitted — we will confirm shortly ✓');
+  } catch (err) {
+    console.error('Payment upload failed:', err);
+    paymentError.textContent = `Upload failed: ${err.message}`;
+    paymentSubmit.disabled = false;
+    paymentSubmit.querySelector('span').textContent = 'Submit payment proof';
+  }
 });
 
 // ============ CUSTOM HOMEPAGE BLOCKS ============

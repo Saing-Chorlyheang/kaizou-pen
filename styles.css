@@ -1124,6 +1124,94 @@ img { max-width: 100%; display: block; }
   justify-content: center;
 }
 
+/* ============ PAYMENT MODAL ============ */
+.payment-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.payment-modal {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  width: 100%; max-width: 420px;
+  max-height: 92vh;
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+  animation: modalIn 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.payment-head {
+  display: flex; align-items: center; gap: 14px;
+  padding: 24px 24px 0;
+}
+.payment-head-icon { font-size: 28px; }
+.payment-head h3 { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+.payment-head p { font-size: 13px; color: var(--accent); font-weight: 600; }
+.payment-body {
+  padding: 20px 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+.payment-qr-wrap {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+.payment-bank-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: #333;
+}
+.payment-hint {
+  font-size: 13px; color: var(--text-dim); text-align: center;
+}
+.payment-payway-btn {
+  width: 100%; justify-content: center; gap: 8px;
+  font-size: 14px;
+}
+.payment-divider {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  color: var(--text-faint); font-size: 12px;
+}
+.payment-divider::before, .payment-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.payment-upload-hint {
+  font-size: 13px; color: var(--text-dim); text-align: center;
+}
+.payment-upload-label {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 12px 20px;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 14px; font-weight: 500; color: var(--text-dim);
+  transition: all 0.2s;
+}
+.payment-upload-label:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255,69,0,0.04);
+}
+.payment-upload-label input[type="file"] { display: none; }
+.payment-preview {
+  width: 100%; border-radius: var(--radius);
+  border: 1px solid var(--border);
+  max-height: 200px; object-fit: contain;
+}
+.payment-error {
+  font-size: 13px; color: var(--accent-2);
+  min-height: 18px; text-align: center;
+}
+.payment-foot {
+  padding: 0 24px 24px;
+}
+.payment-submit { width: 100%; justify-content: center; gap: 10px; }
+.payment-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* ============ CHECKOUT MODAL ============ */
 .checkout {
   background: var(--bg-2);
