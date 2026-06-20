@@ -641,6 +641,10 @@ img { max-width: 100%; display: block; }
   border-radius: var(--radius) var(--radius) 0 0;
   overflow: hidden;
 }
+.trick-video--short {
+  aspect-ratio: 9 / 16;
+  max-height: 420px;
+}
 .trick-video iframe {
   position: absolute;
   inset: 0;
