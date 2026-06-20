@@ -61,7 +61,7 @@ function renderProducts() {
   productGrid.innerHTML = products.map(p => {
     const firstImage = p.images && p.images.length > 0 ? p.images[0] : null;
     const imageContent = firstImage
-      ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" />`
+      ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}" style="width:100%;height:100%;object-fit:contain;border-radius:12px;" />`
       : `<div class="product-pen">
            <div class="p-cap" style="background: ${p.cap_color || 'linear-gradient(180deg,#00ffd1,#00b894)'}"></div>
            <div class="p-body"></div>
