@@ -637,7 +637,7 @@ img { max-width: 100%; display: block; }
   position: relative;
   width: 100%;
   aspect-ratio: 9 / 16;
-  max-height: 220px;
+  max-height: 180px;
   background: #000;
   border-radius: var(--radius) var(--radius) 0 0;
   overflow: hidden;
