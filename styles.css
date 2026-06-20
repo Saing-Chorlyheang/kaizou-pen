@@ -472,14 +472,13 @@ img { max-width: 100%; display: block; }
 
 .product-img {
   width: 100%;
-  aspect-ratio: 3/4;
   border-radius: 10px;
   background: linear-gradient(135deg, var(--bg-2), var(--bg));
   display: grid; place-items: center;
   margin-bottom: 20px;
-  overflow: hidden;
   position: relative;
   border: 1px solid var(--border);
+  min-height: 200px;
 }
 .product-pen {
   position: relative;
