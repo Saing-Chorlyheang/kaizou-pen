@@ -1095,6 +1095,7 @@ img { max-width: 100%; display: block; }
   line-height: 1.7;
   margin-bottom: 28px;
   flex: 1;
+  white-space: pre-line;
 }
 .pdp-actions {
   display: flex; gap: 12px; align-items: stretch;
