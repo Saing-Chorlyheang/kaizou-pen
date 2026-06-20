@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kaizou Pen — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+<div class="bg-grid"></div>
+<div class="bg-noise"></div>
+
+<!-- LOGIN SCREEN -->
+<section id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <span class="logo-mark">K</span>
+      <span class="logo-text">Kaizou<span class="logo-accent">.</span>Pen</span>
+    </div>
+    <h1>Admin login</h1>
+    <p class="login-sub">Sign in to manage products.</p>
+    <form id="loginForm">
+      <label>Email</label>
+      <input type="email" id="loginEmail" required autocomplete="email" placeholder="you@kaizoupen.jp" />
+      <label>Password</label>
+      <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="••••••••" />
+      <button type="submit" class="btn btn-primary" id="loginSubmit">
+        <span>Sign in</span>
+      </button>
+      <div id="loginError" class="login-error"></div>
+    </form>
+    <a href="index.html" class="back-link">← Back to store</a>
+  </div>
+</section>
+
+<!-- ADMIN APP -->
+<section id="adminApp" class="admin-app" hidden>
+  <header class="admin-head">
+    <a href="index.html" class="logo">
+      <span class="logo-mark">K</span>
+      <span class="logo-text">Kaizou<span class="logo-accent">.</span>Pen <span style="color:var(--text-faint);font-weight:400;">/ admin</span></span>
+    </a>
+    <div class="admin-user">
+      <span id="adminEmail" class="admin-email"></span>
+      <button class="btn btn-ghost" id="logoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <div class="admin-body">
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="products">Products</button>
+      <button class="admin-tab" data-tab="blocks">Custom blocks</button>
+    </div>
+
+    <!-- PRODUCTS TAB -->
+    <div class="admin-tab-pane" data-pane="products">
+      <div class="admin-toolbar">
+        <h2>Products <span id="productCount" class="muted"></span></h2>
+        <button class="btn btn-primary" id="newProductBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          <span>New product</span>
+        </button>
+      </div>
+
+      <div class="admin-table" id="adminTable">
+        <div class="admin-empty">Loading…</div>
+      </div>
+    </div>
+
+    <!-- BLOCKS TAB -->
+    <div class="admin-tab-pane" data-pane="blocks" hidden>
+      <div class="admin-toolbar">
+        <h2>Custom blocks <span id="blockCount" class="muted"></span></h2>
+        <button class="btn btn-primary" id="newBlockBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          <span>New block</span>
+        </button>
+      </div>
+
+      <p style="color:var(--text-dim); font-size:13px; margin-bottom:18px;">
+        Custom blocks appear on the homepage between the marquee and the shop section.
+        Use them for announcements, promo banners, stories, anything you want.
+      </p>
+
+      <div class="admin-table" id="blocksTable">
+        <div class="admin-empty">Loading…</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal" id="editModal">
+    <header class="modal-head">
+      <h3 id="modalTitle">New product</h3>
+      <button class="modal-close" id="modalClose">×</button>
+    </header>
+    <form id="productForm" class="modal-body">
+      <input type="hidden" id="pId" />
+
+      <div class="form-row">
+        <label>Name *</label>
+        <input type="text" id="pName" required maxlength="80" placeholder="KZ-01 Classic" />
+      </div>
+
+      <div class="form-row">
+        <label>Short spec</label>
+        <input type="text" id="pSpec" maxlength="120" placeholder="18g · aluminum body · silicone grip" />
+      </div>
+
+      <div class="form-row">
+        <label>Description</label>
+        <textarea id="pDescription" rows="3" placeholder="Detailed product description…"></textarea>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Price (USD) *</label>
+          <input type="number" id="pPrice" required min="0" step="1" placeholder="32" />
+        </div>
+        <div class="form-row">
+          <label>Tag</label>
+          <input type="text" id="pTag" maxlength="20" placeholder="NEW, BESTSELLER, …" />
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Cap color (CSS)</label>
+          <input type="text" id="pCapColor" placeholder="linear-gradient(180deg, #00ffd1, #00b894)" />
+        </div>
+        <div class="form-row">
+          <label>Sort order</label>
+          <input type="number" id="pSortOrder" value="0" step="1" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Active</label>
+        <label class="switch">
+          <input type="checkbox" id="pIsActive" checked />
+          <span>Show on storefront</span>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label>Photos (you can add several)</label>
+        <div class="photo-grid" id="photoGrid"></div>
+        <label class="photo-upload" for="photoInput">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <span>Upload photo(s)</span>
+          <input type="file" id="photoInput" accept="image/*" multiple hidden />
+        </label>
+        <div class="upload-status" id="uploadStatus"></div>
+      </div>
+    </form>
+
+    <footer class="modal-foot">
+      <button type="button" class="btn btn-ghost" id="deleteBtn" hidden>Delete</button>
+      <div style="flex:1"></div>
+      <button type="button" class="btn btn-ghost" id="cancelBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="saveBtn">
+        <span>Save</span>
+      </button>
+    </footer>
+  </div>
+</div>
+
+<!-- BLOCK EDIT MODAL -->
+<div class="modal-overlay" id="blockModalOverlay" hidden>
+  <div class="modal">
+    <header class="modal-head">
+      <h3 id="blockModalTitle">New block</h3>
+      <button class="modal-close" id="blockModalClose">×</button>
+    </header>
+    <form id="blockForm" class="modal-body">
+      <input type="hidden" id="bId" />
+
+      <div class="form-row">
+        <label>Heading</label>
+        <input type="text" id="bHeading" maxlength="120" placeholder="Free shipping this week" />
+      </div>
+
+      <div class="form-row">
+        <label>Body</label>
+        <textarea id="bBody" rows="4" placeholder="Short message. You can keep it plain or use HTML tags like &lt;b&gt;bold&lt;/b&gt; or &lt;a href='...'&gt;links&lt;/a&gt;."></textarea>
+        <div class="muted" style="margin-top:6px; font-size:11px;">
+          HTML allowed: &lt;b&gt; &lt;i&gt; &lt;u&gt; &lt;s&gt; &lt;a&gt; &lt;span&gt; &lt;br&gt; — everything else is stripped.
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>CTA label</label>
+          <input type="text" id="bCtaLabel" maxlength="40" placeholder="Shop now" />
+        </div>
+        <div class="form-row">
+          <label>CTA link (URL or #anchor)</label>
+          <input type="text" id="bCtaUrl" maxlength="300" placeholder="#shop  or  https://…" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Cover image (optional)</label>
+        <div class="photo-grid" id="bPhotoGrid"></div>
+        <label class="photo-upload" for="bPhotoInput">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          <span>Upload image</span>
+          <input type="file" id="bPhotoInput" accept="image/*" hidden />
+        </label>
+        <div class="upload-status" id="bUploadStatus"></div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Sort order</label>
+          <input type="number" id="bSortOrder" value="0" step="1" />
+        </div>
+        <div class="form-row">
+          <label>Active</label>
+          <label class="switch">
+            <input type="checkbox" id="bIsActive" checked />
+            <span>Show on homepage</span>
+          </label>
+        </div>
+      </div>
+    </form>
+
+    <footer class="modal-foot">
+      <button type="button" class="btn btn-ghost" id="bDeleteBtn" hidden>Delete</button>
+      <div style="flex:1"></div>
+      <button type="button" class="btn btn-ghost" id="bCancelBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="bSaveBtn">
+        <span>Save</span>
+      </button>
+    </footer>
+  </div>
+</div>
+
+<!-- CONFIG WARNING -->
+<div id="configWarning" hidden class="config-warning">
+  <div>
+    <h3>⚠ Supabase not configured</h3>
+    <p>Open <code>supabase-config.js</code> and paste your <code>SUPABASE_URL</code> and <code>SUPABASE_ANON</code> key. See <code>SETUP.md</code>.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

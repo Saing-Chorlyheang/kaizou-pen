@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kaizou Pen — Engineered for the Spin</title>
+<meta name="description" content="Kaizou Pen — premium custom spinning pens engineered for pen spinners. Balanced, modded, ready to fly." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<script>
+  (function(){
+    var t = localStorage.getItem('kz-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
+</head>
+<body>
+
+<!-- Animated background -->
+<div class="bg-gradient"></div>
+<div class="bg-grid"></div>
+<div class="bg-noise"></div>
+
+<!-- Nav -->
+<nav class="nav">
+  <a href="#" class="logo">
+    <span class="logo-mark" data-edit-key="nav.logo.mark">K</span>
+    <span class="logo-text">Kaizou<span class="logo-accent">.</span>Pen</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#shop" data-edit-key="nav.link.shop">Shop</a></li>
+    <li><a href="#tricks" data-edit-key="nav.link.tricks">Tricks</a></li>
+    <li><a href="#about" data-edit-key="nav.link.about">About</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle light / dark mode">
+      <span class="theme-toggle-icon" id="themeIcon">☀️</span>
+      <div class="theme-toggle-track"></div>
+    </button>
+    <button class="cart-btn" id="cartBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span>Cart</span>
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      <span data-edit-key="hero.badge">New drop — Spring 2026</span>
+    </div>
+    <h1 class="hero-title">
+      <span class="title-line" data-edit-key="hero.title.line1">Engineered</span>
+      <span class="title-line">for the <span class="gradient-text" data-edit-key="hero.title.accent">spin.</span></span>
+    </h1>
+    <p class="hero-tagline optional-slot" data-edit-key="hero.tagline" data-placeholder="+ Click to add a tagline below the title"></p>
+    <p class="hero-sub" data-edit-key="hero.sub">
+      Hand-modded, weight-tuned, friction-balanced. Kaizou Pen builds the
+      hardware pen spinners actually want — not the pen the office wants.
+    </p>
+    <div class="hero-cta">
+      <a href="#shop" class="btn btn-primary">
+        <span data-edit-key="hero.cta.primary">Shop pens</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#tricks" class="btn btn-ghost" data-edit-key="hero.cta.ghost">Tricks</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num" data-edit-key="hero.stat1.num">12k+</div>
+        <div class="stat-label" data-edit-key="hero.stat1.label">pens shipped</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" data-edit-key="hero.stat2.num">38</div>
+        <div class="stat-label" data-edit-key="hero.stat2.label">countries</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" data-edit-key="hero.stat3.num">4.9★</div>
+        <div class="stat-label" data-edit-key="hero.stat3.label">avg rating</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="orbit orbit-1"></div>
+    <div class="orbit orbit-2"></div>
+    <div class="orbit orbit-3"></div>
+    <div class="pen-photo-wrap">
+      <img src="pen.png" alt="Kaizou spinning pen" class="pen-photo" />
+    </div>
+    <div class="glow"></div>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span>BALANCED ⚡</span><span>MODDED</span><span>WEIGHT-TUNED ⚡</span>
+    <span>FRICTION-BALANCED</span><span>BUILT FOR SPINNERS ⚡</span><span>KAIZOU PEN</span>
+    <span>BALANCED ⚡</span><span>MODDED</span><span>WEIGHT-TUNED ⚡</span>
+    <span>FRICTION-BALANCED</span><span>BUILT FOR SPINNERS ⚡</span><span>KAIZOU PEN</span>
+  </div>
+</div>
+
+<!-- Custom Blocks (admin-defined) -->
+<section id="blocks" class="blocks-section" hidden>
+  <div class="blocks-wrap" id="blocksWrap"></div>
+</section>
+
+<!-- Shop -->
+<section id="shop" class="section">
+  <div class="section-head">
+    <span class="section-tag" data-edit-key="shop.tag">/ collection</span>
+    <h2 class="section-title" data-edit-key="shop.title">The current lineup.</h2>
+    <p class="section-sub" data-edit-key="shop.sub">Six modded pens, each tuned for a different style. Pick your weapon.</p>
+    <p class="section-extra optional-slot" data-edit-key="shop.extra" data-placeholder="+ Click to add an extra note above the products"></p>
+  </div>
+
+  <div class="product-grid" id="productGrid"></div>
+</section>
+
+<!-- Tricks -->
+<section id="tricks" class="section">
+  <div class="section-head">
+    <span class="section-tag" data-edit-key="tricks.tag">/ tricks</span>
+    <h2 class="section-title" data-edit-key="tricks.title">What can you do with one?</h2>
+  </div>
+
+  <div class="tricks-grid">
+    <div class="trick-card">
+      <div class="trick-video">
+        <iframe src="https://www.youtube.com/embed/5C-d6l1G5Ts" title="ThumbAround tutorial" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <h4 data-edit-key="tricks.card1.title">ThumbAround</h4>
+      <p data-edit-key="tricks.card1.desc">The first trick everyone learns. A KZ-01 makes it click in days, not weeks.</p>
+    </div>
+    <div class="trick-card">
+      <div class="trick-video">
+        <iframe src="https://www.youtube.com/embed/w5PI6dJPStc" title="Sonic tutorial" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <h4 data-edit-key="tricks.card2.title">Sonic</h4>
+      <p data-edit-key="tricks.card2.desc">Pure speed. Our heaviest pen, the KZ-Heavy, is built for it.</p>
+    </div>
+    <div class="trick-card">
+      <div class="trick-video">
+        <iframe src="https://www.youtube.com/embed/WV2qRZDn_yI" title="Tornado tutorial" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <h4 data-edit-key="tricks.card3.title">Tornado</h4>
+      <p data-edit-key="tricks.card3.desc">The hypnotic spin. Smooth-grip pens like the KZ-Sleek make it look effortless.</p>
+    </div>
+    <div class="trick-card">
+      <div class="trick-video">
+        <iframe src="https://www.youtube.com/embed/OUvwdvUxdTM" title="Double Charge tutorial" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <h4 data-edit-key="tricks.card4.title">Double Charge</h4>
+      <p data-edit-key="tricks.card4.desc">Continuous flow at full speed. You need a balanced pen. You need this one.</p>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about" class="section about">
+  <div class="about-grid">
+    <div>
+      <span class="section-tag" data-edit-key="about.tag">/ about</span>
+      <h2 class="section-title" data-edit-key="about.title">Built by spinners. Not by office-supply brands.</h2>
+      <p class="about-text" data-edit-key="about.p1">
+        Kaizou started in 2021 in a garage in Osaka. We were tired of cutting
+        up Hi-Tec C and Dr. Grip pens just to get something that flew right.
+        So we built our own.
+      </p>
+      <blockquote class="about-callout optional-slot" data-edit-key="about.callout" data-placeholder="+ Click to add a pull-quote or callout"></blockquote>
+      <p class="about-text" data-edit-key="about.p2">
+        Three years and twelve thousand pens later, we ship to 38 countries.
+        Every pen is still hand-tested. Every grip is still hand-cut. The
+        garage is bigger now. The obsession isn't.
+      </p>
+      <a href="#shop" class="btn btn-primary">
+        <span data-edit-key="about.cta">Find your pen</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="about-card">
+      <div class="about-stat">
+        <div class="about-stat-num" data-edit-key="about.stat1.num">2021</div>
+        <div class="about-stat-label" data-edit-key="about.stat1.label">Founded in Osaka</div>
+      </div>
+      <div class="about-stat">
+        <div class="about-stat-num" data-edit-key="about.stat2.num">100%</div>
+        <div class="about-stat-label" data-edit-key="about.stat2.label">Hand-tested before shipping</div>
+      </div>
+      <div class="about-stat">
+        <div class="about-stat-num" data-edit-key="about.stat3.num">30-day</div>
+        <div class="about-stat-label" data-edit-key="about.stat3.label">No-questions returns</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <a href="#" class="logo">
+        <span class="logo-mark">K</span>
+        <span class="logo-text">Kaizou<span class="logo-accent">.</span>Pen</span>
+      </a>
+      <p class="footer-tag" data-edit-key="footer.tag">Engineered for the spin.</p>
+    </div>
+    <div>
+      <h5 data-edit-key="footer.col1.heading">Shop</h5>
+      <a href="#shop" data-edit-key="footer.col1.link1">All pens</a>
+      <a href="#shop" data-edit-key="footer.col1.link2">Grips</a>
+      <a href="#shop" data-edit-key="footer.col1.link3">Caps</a>
+    </div>
+    <div>
+      <h5 data-edit-key="footer.col2.heading">Learn</h5>
+      <a href="#tricks" data-edit-key="footer.col2.link2">Tricks</a>
+      <a href="#about" data-edit-key="footer.col2.link3">About</a>
+    </div>
+    <div>
+      <h5 data-edit-key="footer.col3.heading">Contact</h5>
+      <a href="#" data-edit-key="footer.col3.link1">hello@kaizoupen.jp</a>
+      <a href="#" data-edit-key="footer.col3.link2">Instagram</a>
+      <a href="#" data-edit-key="footer.col3.link3">Discord</a>
+    </div>
+  </div>
+  <div class="footer-social">
+    <span class="footer-social-label">Follow us</span>
+    <div class="footer-social-links">
+      <a href="https://t.me/PenSpinningModCambodiaChannels" class="social-link" target="_blank" rel="noopener noreferrer" title="Telegram Channel">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.88 13.944l-2.967-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.835.953l-.52-.338z"/></svg>
+        <span>Channel</span>
+      </a>
+      <a href="https://t.me/penspinningmodcambodia" class="social-link" target="_blank" rel="noopener noreferrer" title="Telegram Group">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.88 13.944l-2.967-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.835.953l-.52-.338z"/></svg>
+        <span>Group</span>
+      </a>
+      <a href="https://youtube.com/@kaizou_pen?si=5Ug1ZAdyOlv_TBiy" class="social-link" target="_blank" rel="noopener noreferrer" title="YouTube">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        <span>YouTube</span>
+      </a>
+      <a href="https://www.tiktok.com/@kaizoupen?_r=1&_t=ZS-97BaJhk91bY" class="social-link" target="_blank" rel="noopener noreferrer" title="TikTok">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.75a8.27 8.27 0 0 0 4.83 1.55V6.85a4.85 4.85 0 0 1-1.06-.16z"/></svg>
+        <span>TikTok</span>
+      </a>
+      <a href="https://www.instagram.com/kaizou_pen?igsh=enVzY24wbHJyeDBw&utm_source=qr" class="social-link" target="_blank" rel="noopener noreferrer" title="Instagram">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+        <span>Instagram</span>
+      </a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span data-edit-key="footer.copyright">© 2026 Kaizou Pen Co. — Made in Osaka.</span>
+    <span class="footer-mono" data-edit-key="footer.version">v.2026.05</span>
+  </div>
+</footer>
+
+<!-- Floating Format Toolbar (appears when admin selects text in edit mode) -->
+<div class="fmt-toolbar" id="fmtToolbar" hidden>
+  <button class="fmt-btn" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+  <button class="fmt-btn" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+  <button class="fmt-btn" data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+  <button class="fmt-btn" data-cmd="strike" title="Strikethrough"><s>S</s></button>
+  <span class="fmt-sep"></span>
+  <select class="fmt-font" id="fmtFont" title="Font family">
+    <option value="">Font…</option>
+    <option value="default">Sans (default)</option>
+    <option value="serif">Serif (Playfair)</option>
+    <option value="mono">Mono (JetBrains)</option>
+    <option value="display">Display (Bebas)</option>
+    <option value="hand">Handwriting (Caveat)</option>
+  </select>
+  <span class="fmt-sep"></span>
+  <button class="fmt-btn" data-cmd="size-s" title="Smaller">A<sub>−</sub></button>
+  <button class="fmt-btn" data-cmd="size-l" title="Larger">A<sup>+</sup></button>
+  <button class="fmt-btn" data-cmd="size-reset" title="Reset size">A</button>
+  <span class="fmt-sep"></span>
+  <button class="fmt-btn" data-cmd="color" title="Text color">
+    <span class="fmt-swatch" id="fmtSwatch"></span>
+  </button>
+  <input type="color" id="fmtColorInput" value="#ff4500" />
+  <button class="fmt-btn" data-cmd="link" title="Add link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+  </button>
+  <button class="fmt-btn" data-cmd="unlink" title="Remove link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07L10 7"/><path d="M5.17 11.75l-1.71 1.71a5 5 0 0 0 7.07 7.07L14 17"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+  </button>
+  <span class="fmt-sep"></span>
+  <button class="fmt-btn" data-cmd="clear" title="Clear formatting">✕</button>
+</div>
+
+<!-- Admin Edit Bar (only shows for logged-in admins) -->
+<div class="edit-bar" id="editBar" hidden>
+  <div class="edit-bar-status">
+    <span class="edit-bar-dot"></span>
+    <span id="editBarLabel">Admin mode</span>
+  </div>
+  <button class="edit-bar-btn" id="toggleEditBtn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+    <span id="toggleEditLabel">Edit text</span>
+  </button>
+  <a href="admin.html" class="edit-bar-btn ghost">Products</a>
+  <button class="edit-bar-btn ghost" id="editBarLogout">Sign out</button>
+</div>
+
+<!-- Product Detail Modal -->
+<div class="pdp-overlay" id="pdpOverlay" hidden>
+  <div class="pdp" id="pdp">
+    <button class="pdp-close" id="pdpClose" aria-label="Close">×</button>
+    <div class="pdp-gallery">
+      <div class="pdp-main-img" id="pdpMainImg"></div>
+      <div class="pdp-thumbs" id="pdpThumbs"></div>
+    </div>
+    <div class="pdp-info">
+      <div id="pdpTag" class="pdp-tag" hidden></div>
+      <h2 class="pdp-name" id="pdpName"></h2>
+      <div class="pdp-spec" id="pdpSpec"></div>
+      <div class="pdp-price" id="pdpPrice"></div>
+      <p class="pdp-desc" id="pdpDesc"></p>
+      <div class="pdp-actions">
+        <div class="pdp-qty">
+          <button class="qty-btn" id="pdpDec">−</button>
+          <span class="qty-num" id="pdpQty">1</span>
+          <button class="qty-btn" id="pdpInc">+</button>
+        </div>
+        <button class="btn btn-primary pdp-add" id="pdpAdd">
+          <span>Add to cart</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout Form Modal -->
+<div class="checkout-overlay" id="checkoutOverlay" hidden>
+  <div class="checkout">
+    <header class="checkout-head">
+      <h3>Complete your order</h3>
+      <button class="pdp-close" id="checkoutClose" aria-label="Close">×</button>
+    </header>
+    <form id="checkoutForm" class="checkout-body" novalidate>
+      <div class="checkout-section">
+        <div class="checkout-section-title">Your info</div>
+        <div class="form-row">
+          <label>Full name *</label>
+          <input type="text" id="coName" required maxlength="80" placeholder="Sok Pich" />
+        </div>
+        <div class="form-row">
+          <label>Phone or Telegram *</label>
+          <input type="text" id="coContact" required maxlength="80" placeholder="+855 12 345 678  or  @username" />
+        </div>
+        <div class="form-row">
+          <label>Delivery address *</label>
+          <textarea id="coAddress" required rows="3" placeholder="House #, street, sangkat, khan, city/province"></textarea>
+        </div>
+      </div>
+
+      <div class="checkout-section">
+        <div class="checkout-section-title">Shipping</div>
+        <div class="ship-options" id="shipOptions">
+          <label class="ship-opt">
+            <input type="radio" name="ship" value="Virak Buntham" checked />
+            <span class="ship-name">Virak Buntham</span>
+            <span class="ship-note">Express · nationwide</span>
+          </label>
+          <label class="ship-opt">
+            <input type="radio" name="ship" value="J&T" />
+            <span class="ship-name">J&T Express</span>
+            <span class="ship-note">2–3 days · door-to-door</span>
+          </label>
+          <label class="ship-opt">
+            <input type="radio" name="ship" value="__other__" />
+            <span class="ship-name">Other</span>
+            <span class="ship-note">Specify carrier</span>
+          </label>
+        </div>
+        <div class="form-row" id="shipOtherWrap" hidden>
+          <label>Carrier name *</label>
+          <input type="text" id="coShipOther" maxlength="60" placeholder="e.g. Kerry Express, Cambodia Post…" />
+        </div>
+      </div>
+
+      <div class="checkout-section">
+        <div class="checkout-section-title">Notes (optional)</div>
+        <div class="form-row">
+          <textarea id="coNotes" rows="2" maxlength="300" placeholder="Anything we should know?"></textarea>
+        </div>
+      </div>
+
+      <div class="checkout-summary" id="checkoutSummary"></div>
+      <div class="checkout-error" id="checkoutError"></div>
+    </form>
+    <footer class="checkout-foot">
+      <button type="button" class="btn btn-ghost" id="checkoutBack">Back to cart</button>
+      <button type="button" class="btn btn-primary" id="checkoutSubmit">
+        <span>Place order</span>
+      </button>
+    </footer>
+  </div>
+</div>
+
+<!-- Cart Drawer -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-drawer" id="cartDrawer">
+  <div class="cart-head">
+    <h3>Your cart</h3>
+    <button class="cart-close" id="cartClose">×</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-foot">
+    <div class="cart-total">
+      <span>Total</span>
+      <span id="cartTotal">$0</span>
+    </div>
+    <button class="btn btn-primary cart-checkout" id="cartCheckout">
+      <span>Checkout</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</aside>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
