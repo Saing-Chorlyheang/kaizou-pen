@@ -636,14 +636,10 @@ img { max-width: 100%; display: block; }
 .trick-video {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 9 / 16;
   background: #000;
   border-radius: var(--radius) var(--radius) 0 0;
   overflow: hidden;
-}
-.trick-video--short {
-  aspect-ratio: 9 / 16;
-  max-height: 420px;
 }
 .trick-video iframe {
   position: absolute;
