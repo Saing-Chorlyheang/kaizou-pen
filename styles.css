@@ -1324,6 +1324,18 @@ img { max-width: 100%; display: block; }
   font-size: 11px;
   color: var(--text-faint);
 }
+.ship-avail-note {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.avail-ok   { background: rgba(0, 200, 100, 0.1); color: #007a3d; border: 1px solid rgba(0,160,80,0.25); }
+.avail-warn { background: rgba(255, 160, 0, 0.1); color: #8a5200; border: 1px solid rgba(200,120,0,0.25); }
+[data-theme="dark"] .avail-ok   { color: #00d97a; border-color: rgba(0,200,100,0.3); }
+[data-theme="dark"] .avail-warn { color: #f0a800; border-color: rgba(200,140,0,0.3); }
 
 .checkout-summary {
   margin: 16px 0 4px;

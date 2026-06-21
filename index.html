@@ -376,12 +376,22 @@
           <label class="ship-opt">
             <input type="radio" name="ship" value="Virak Buntham" checked />
             <span class="ship-name">Virak Buntham</span>
-            <span class="ship-note">Express · nationwide</span>
+            <span class="ship-note">Express · nationwide · $2 flat</span>
           </label>
           <label class="ship-opt">
             <input type="radio" name="ship" value="J&T" />
             <span class="ship-name">J&T Express</span>
-            <span class="ship-note">2–3 days · door-to-door</span>
+            <span class="ship-note">2–3 days · door-to-door · $2 flat</span>
+          </label>
+          <label class="ship-opt">
+            <input type="radio" name="ship" value="Grab" />
+            <span class="ship-name">Grab delivery</span>
+            <span class="ship-note">Phnom Penh only · fee varies by location</span>
+          </label>
+          <label class="ship-opt">
+            <input type="radio" name="ship" value="Direct" />
+            <span class="ship-name">Direct by seller</span>
+            <span class="ship-note">Phnom Penh only · fee varies by location</span>
           </label>
           <label class="ship-opt">
             <input type="radio" name="ship" value="__other__" />
@@ -389,6 +399,7 @@
             <span class="ship-note">Specify carrier</span>
           </label>
         </div>
+        <div class="ship-avail-note" id="shipAvailNote" hidden></div>
         <div class="form-row" id="shipOtherWrap" hidden>
           <label>Carrier name *</label>
           <input type="text" id="coShipOther" maxlength="60" placeholder="e.g. Kerry Express, Cambodia Post…" />

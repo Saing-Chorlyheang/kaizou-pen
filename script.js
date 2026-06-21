@@ -409,12 +409,29 @@ const coShipOther = document.getElementById('coShipOther');
 const coNotes    = document.getElementById('coNotes');
 const shipOptions   = document.getElementById('shipOptions');
 const shipOtherWrap = document.getElementById('shipOtherWrap');
+const shipAvailNote = document.getElementById('shipAvailNote');
+
+// Cambodia is UTC+7. Returns true if Grab/Direct delivery is available right now.
+function isLocalDeliveryAvailable() {
+  const now = new Date();
+  const phnom = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
+  const day = phnom.getDay(); // 0=Sun, 6=Sat
+  const h = phnom.getHours();
+  const m = phnom.getMinutes();
+  const isWeekend = day === 0 || day === 6;
+  const afterHalf5 = h > 17 || (h === 17 && m >= 30);
+  return isWeekend || afterHalf5;
+}
 
 function openCheckout() {
   if (cart.size === 0) return;
   closeCart();
   renderCheckoutSummary();
   checkoutError.textContent = '';
+  shipAvailNote.hidden = true;
+  const first = shipOptions.querySelector('input[name="ship"]');
+  if (first) first.checked = true;
+  shipOtherWrap.hidden = true;
   checkoutOverlay.hidden = false;
   document.body.style.overflow = 'hidden';
   setTimeout(() => coName.focus(), 100);
@@ -445,6 +462,8 @@ function renderCheckoutSummary() {
 shipOptions.addEventListener('change', () => {
   const selected = shipOptions.querySelector('input[name="ship"]:checked');
   if (!selected) return;
+  const isLocal = selected.value === 'Grab' || selected.value === 'Direct';
+
   if (selected.value === '__other__') {
     shipOtherWrap.hidden = false;
     coShipOther.required = true;
@@ -452,6 +471,17 @@ shipOptions.addEventListener('change', () => {
   } else {
     shipOtherWrap.hidden = true;
     coShipOther.required = false;
+  }
+
+  if (isLocal) {
+    const avail = isLocalDeliveryAvailable();
+    shipAvailNote.hidden = false;
+    shipAvailNote.className = 'ship-avail-note ' + (avail ? 'avail-ok' : 'avail-warn');
+    shipAvailNote.textContent = avail
+      ? '✓ Available now — Phnom Penh area only. Shipping fee depends on your location.'
+      : '⚠ Available Saturday & Sunday (all day) and weekdays after 5:30 PM only. Phnom Penh area only. Shipping fee depends on your location.';
+  } else {
+    shipAvailNote.hidden = true;
   }
 });
 
@@ -532,6 +562,7 @@ checkoutSubmit.addEventListener('click', async () => {
   coAddress.value = '';
   coNotes.value = '';
   coShipOther.value = '';
+  shipAvailNote.hidden = true;
   shipOtherWrap.hidden = true;
   const first = shipOptions.querySelector('input[name="ship"]');
   if (first) first.checked = true;
