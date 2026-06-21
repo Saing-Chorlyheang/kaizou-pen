@@ -56,8 +56,33 @@ async function loadProducts() {
 
 // ============ RENDER PRODUCTS ============
 const productGrid = document.getElementById('productGrid');
+const shopCount   = document.getElementById('shopCount');
+
+let currentSort = 'default';
+
+function getSortedProducts() {
+  const copy = [...products];
+  if (currentSort === 'asc')  copy.sort((a, b) => a.price - b.price);
+  if (currentSort === 'desc') copy.sort((a, b) => b.price - a.price);
+  return copy;
+}
+
+// Sort buttons
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentSort = btn.dataset.sort;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderProducts();
+  });
+});
 
 function renderProducts() {
+  const sorted = getSortedProducts();
+  if (shopCount) shopCount.textContent = `${sorted.length} pen${sorted.length !== 1 ? 's' : ''}`;
+  // swap products for render then restore
+  const _orig = products;
+  products = sorted;
   productGrid.innerHTML = products.map(p => {
     const firstImage = p.images && p.images.length > 0 ? p.images[0] : null;
     const imageContent = firstImage
@@ -86,6 +111,8 @@ function renderProducts() {
       </div>
     </article>`;
   }).join('');
+
+  products = _orig; // restore original order
 
   document.querySelectorAll('.add-btn').forEach(btn => {
     btn.addEventListener('click', e => {
