@@ -176,6 +176,11 @@ img { max-width: 100%; display: block; }
   width: auto;
   display: block;
   object-fit: contain;
+  mix-blend-mode: multiply;
+}
+[data-theme="dark"] .logo-img {
+  mix-blend-mode: normal;
+  filter: invert(1);
 }
 .logo-mark {
   width: 32px; height: 32px; border-radius: 8px;
