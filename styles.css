@@ -2108,9 +2108,8 @@ body.edit-mode [data-edit-key]:focus {
     border-right: none;
     border-bottom: 1px solid var(--border);
     padding: 16px;
-    max-height: 280px;
   }
-  .pdp-main-img { min-height: 200px; max-height: 220px; }
+  .pdp-main-img { min-height: 260px; max-height: none; }
   .pdp-info {
     overflow-y: visible;    /* no inner scroll — let the overlay handle it */
     padding: 20px 20px 32px;
