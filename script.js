@@ -507,8 +507,8 @@ shipOptions.addEventListener('change', () => {
     shipAvailNote.hidden = false;
     shipAvailNote.className = 'ship-avail-note ' + (avail ? 'avail-ok' : 'avail-warn');
     shipAvailNote.textContent = avail
-      ? '✓ Available now — Phnom Penh area only. Shipping fee depends on your location.'
-      : '⚠ Available Saturday & Sunday (all day) and weekdays after 5:30 PM only. Phnom Penh area only. Shipping fee depends on your location.';
+      ? '✓ Available now · Weekdays from 5:30 PM, Saturday & Sunday anytime · Phnom Penh area only · Shipping fee depends on your location.'
+      : '⚠ Not available right now · Available weekdays from 5:30 PM, Saturday & Sunday anytime · Phnom Penh area only · Shipping fee depends on your location.';
   } else {
     shipAvailNote.hidden = true;
   }
