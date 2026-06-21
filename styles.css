@@ -172,7 +172,7 @@ img { max-width: 100%; display: block; }
   font-weight: 700; font-size: 18px;
 }
 .logo-img {
-  height: 48px;
+  height: 96px;
   width: auto;
   display: block;
   object-fit: contain;
