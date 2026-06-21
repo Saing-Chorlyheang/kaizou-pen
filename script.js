@@ -502,10 +502,11 @@ checkoutSubmit.addEventListener('click', async () => {
   checkoutSubmit.disabled = true;
   checkoutSubmit.querySelector('span').textContent = 'Placing order…';
 
-  let savedOrderId = null;
+  const savedOrderId = crypto.randomUUID();
 
   if (window.SUPABASE_CONFIGURED) {
-    const { data, error } = await window.sb.from('orders').insert({
+    const { error } = await window.sb.from('orders').insert({
+      id:              savedOrderId,
       customer_name:   name,
       contact:         contact,
       address:         address,
@@ -514,7 +515,7 @@ checkoutSubmit.addEventListener('click', async () => {
       subtotal:        subtotal,
       notes:           notesValue || null,
       status:          'awaiting_payment',
-    }).select('id').single();
+    });
 
     if (error) {
       console.error('Order failed:', error);
@@ -523,7 +524,6 @@ checkoutSubmit.addEventListener('click', async () => {
       checkoutSubmit.querySelector('span').textContent = 'Place order';
       return;
     }
-    savedOrderId = data.id;
   }
 
   // Reset form
