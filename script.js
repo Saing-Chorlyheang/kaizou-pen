@@ -715,12 +715,21 @@ paymentSubmit.addEventListener('click', async () => {
       if (payErr) throw payErr;
     }
 
+    // Save order reference to localStorage for tracking
+    try {
+      const saved = JSON.parse(localStorage.getItem('kz_orders') || '[]');
+      if (!saved.includes(_pendingOrderId)) {
+        saved.unshift(_pendingOrderId);
+        localStorage.setItem('kz_orders', JSON.stringify(saved.slice(0, 10)));
+      }
+    } catch(_) {}
+
     // Clear cart now that payment proof submitted
     cart.clear();
     renderCart();
 
     closePaymentModal();
-    showToast('Payment proof submitted — we will confirm shortly ✓');
+    showToast('Payment proof submitted — track your order with the Track button ✓');
   } catch (err) {
     console.error('Payment upload failed:', err);
     paymentError.textContent = `Upload failed: ${err.message}`;
@@ -1430,6 +1439,146 @@ if (window.SUPABASE_CONFIGURED) {
     applyTheme(next);
   });
 })();
+
+// ============ ORDER TRACKING ============
+const trackOverlay  = document.getElementById('trackOverlay');
+const trackClose    = document.getElementById('trackClose');
+const trackInput    = document.getElementById('trackInput');
+const trackLookupBtn= document.getElementById('trackLookupBtn');
+const trackError    = document.getElementById('trackError');
+const trackResults  = document.getElementById('trackResults');
+const trackOrderList= document.getElementById('trackOrderList');
+const trackOrderBtn = document.getElementById('trackOrderBtn');
+
+const STATUS_STEPS = [
+  { key: 'awaiting_payment', label: 'Payment sent',     icon: '💳' },
+  { key: 'confirmed',        label: 'Payment confirmed', icon: '✅' },
+  { key: 'shipped',          label: 'On the way',        icon: '🚚' },
+  { key: 'delivered',        label: 'Delivered',         icon: '🎉' },
+];
+
+const STATUS_MSG = {
+  awaiting_payment: "We've received your order. Payment proof is under review.",
+  confirmed:        "Payment confirmed! We're preparing your pen.",
+  shipped:          "Your pen is on the way! Check your contact for tracking info.",
+  delivered:        "Delivered! Enjoy your pen. 🖊",
+  cancelled:        "This order has been cancelled. Contact us for help.",
+};
+
+function renderTrackingCard(order) {
+  const stepIndex = STATUS_STEPS.findIndex(s => s.key === order.status);
+  const isCancelled = order.status === 'cancelled';
+  const date = new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+  const stepsHtml = STATUS_STEPS.map((s, i) => {
+    const done    = !isCancelled && i <= stepIndex;
+    const current = !isCancelled && i === stepIndex;
+    return `<div class="ts-step ${done ? 'done' : ''} ${current ? 'current' : ''}">
+      <div class="ts-dot">${done ? s.icon : ''}</div>
+      <div class="ts-label">${s.label}</div>
+    </div>`;
+  }).join('<div class="ts-line"></div>');
+
+  const items = Array.isArray(order.items)
+    ? order.items.map(it => `<span class="track-item">${escapeHtml(it.name)} ×${it.qty}</span>`).join('')
+    : '';
+
+  return `
+  <div class="track-card ${isCancelled ? 'cancelled' : ''}">
+    <div class="track-card-head">
+      <div>
+        <div class="track-order-id">Order #${order.id.slice(0,8).toUpperCase()}</div>
+        <div class="track-order-date">${date}</div>
+      </div>
+      <div class="track-status-badge status-${order.status}">${order.status.replace('_', ' ')}</div>
+    </div>
+    ${items ? `<div class="track-items">${items}</div>` : ''}
+    <div class="track-timeline">${stepsHtml}</div>
+    <div class="track-msg ${isCancelled ? 'track-msg-cancel' : ''}">${STATUS_MSG[order.status] || ''}</div>
+    <div class="track-total">Total: <strong>$${((order.subtotal || 0) + (order.shipping_fee || 0)).toLocaleString()}</strong>${order.shipping_fee ? ` (incl. $${order.shipping_fee} shipping)` : ''}</div>
+  </div>`;
+}
+
+async function lookupOrders(contact) {
+  if (!window.SUPABASE_CONFIGURED) {
+    trackError.textContent = 'Supabase not configured.';
+    trackError.hidden = false;
+    return;
+  }
+
+  trackLookupBtn.disabled = true;
+  trackLookupBtn.querySelector('span').textContent = 'Searching…';
+  trackError.hidden = true;
+  trackResults.hidden = true;
+
+  const { data, error } = await window.sb
+    .from('orders')
+    .select('*')
+    .ilike('contact', `%${contact.trim()}%`)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  trackLookupBtn.disabled = false;
+  trackLookupBtn.querySelector('span').textContent = 'Search';
+
+  if (error) {
+    trackError.textContent = 'Could not fetch orders. Try again.';
+    trackError.hidden = false;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    trackError.textContent = 'No orders found for that phone / Telegram. Check the number and try again.';
+    trackError.hidden = false;
+    return;
+  }
+
+  trackOrderList.innerHTML = data.map(renderTrackingCard).join('');
+  trackResults.hidden = false;
+}
+
+async function lookupByIds(ids) {
+  if (!window.SUPABASE_CONFIGURED || !ids.length) return;
+  const { data } = await window.sb
+    .from('orders')
+    .select('*')
+    .in('id', ids)
+    .order('created_at', { ascending: false });
+  if (data && data.length) {
+    trackOrderList.innerHTML = data.map(renderTrackingCard).join('');
+    trackResults.hidden = false;
+  }
+}
+
+function openTrackModal() {
+  trackOverlay.hidden = false;
+  document.body.style.overflow = 'hidden';
+  trackError.hidden = true;
+  trackResults.hidden = true;
+  trackOrderList.innerHTML = '';
+
+  // Auto-load from localStorage
+  try {
+    const saved = JSON.parse(localStorage.getItem('kz_orders') || '[]');
+    if (saved.length) lookupByIds(saved);
+  } catch(_) {}
+}
+
+function closeTrackModal() {
+  trackOverlay.hidden = true;
+  document.body.style.overflow = '';
+}
+
+trackOrderBtn.addEventListener('click', openTrackModal);
+trackClose.addEventListener('click', closeTrackModal);
+trackOverlay.addEventListener('click', e => { if (e.target === trackOverlay) closeTrackModal(); });
+
+trackLookupBtn.addEventListener('click', () => {
+  const val = trackInput.value.trim();
+  if (!val) { trackError.textContent = 'Please enter your phone or Telegram username.'; trackError.hidden = false; return; }
+  lookupOrders(val);
+});
+trackInput.addEventListener('keydown', e => { if (e.key === 'Enter') trackLookupBtn.click(); });
 
 // ============ INIT ============
 (async () => {
