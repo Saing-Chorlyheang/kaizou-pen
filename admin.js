@@ -728,7 +728,7 @@ async function loadOrders() {
           </div>
           <div>
             <div style="font-size:13px;color:var(--text-dim);">${escapeHtml(itemsSummary)}</div>
-            <div style="font-weight:600;margin-top:3px;">$${(o.subtotal || 0).toLocaleString()}</div>
+            <div style="font-weight:600;margin-top:3px;">$${(o.subtotal || 0).toLocaleString()} + $${(o.shipping_fee || 0).toLocaleString()} shipping = <span style="color:var(--accent)">$${((o.subtotal || 0) + (o.shipping_fee || 0)).toLocaleString()}</span></div>
           </div>
           <div class="order-proof-cell">
             ${proof

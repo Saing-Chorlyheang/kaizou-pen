@@ -1350,8 +1350,13 @@ img { max-width: 100%; display: block; }
   padding: 4px 0;
   color: var(--text-dim);
 }
-.checkout-summary-row.total {
+.checkout-summary-row.subtotal-row {
   margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.checkout-summary-row.total {
+  margin-top: 4px;
   padding-top: 10px;
   border-top: 1px solid var(--border);
   color: var(--text);

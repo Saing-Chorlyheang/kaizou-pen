@@ -426,12 +426,12 @@ function isLocalDeliveryAvailable() {
 function openCheckout() {
   if (cart.size === 0) return;
   closeCart();
-  renderCheckoutSummary();
-  checkoutError.textContent = '';
-  shipAvailNote.hidden = true;
   const first = shipOptions.querySelector('input[name="ship"]');
   if (first) first.checked = true;
   shipOtherWrap.hidden = true;
+  shipAvailNote.hidden = true;
+  renderCheckoutSummary(first ? first.value : null);
+  checkoutError.textContent = '';
   checkoutOverlay.hidden = false;
   document.body.style.overflow = 'hidden';
   setTimeout(() => coName.focus(), 100);
@@ -442,9 +442,33 @@ function closeCheckout() {
   document.body.style.overflow = '';
 }
 
-function renderCheckoutSummary() {
+const SHIPPING_FEES = {
+  'Virak Buntham': 2,
+  'J&T':           2,
+};
+
+function getShippingFee(method) {
+  return SHIPPING_FEES[method] ?? null; // null = varies/unknown
+}
+
+function renderCheckoutSummary(shippingMethod) {
   const items = [...cart.values()];
   const subtotal = items.reduce((s, i) => s + i.qty * i.price, 0);
+  const fee = shippingMethod ? getShippingFee(shippingMethod) : null;
+  const total = fee !== null ? subtotal + fee : subtotal;
+
+  const shippingRow = fee !== null
+    ? `<div class="checkout-summary-row">
+         <span>Shipping</span>
+         <span>$${fee.toLocaleString()}</span>
+       </div>`
+    : fee === null && shippingMethod && shippingMethod !== 'Virak Buntham' && shippingMethod !== 'J&T'
+      ? `<div class="checkout-summary-row">
+           <span>Shipping</span>
+           <span style="color:var(--text-dim);font-size:12px;">TBD · varies by location</span>
+         </div>`
+      : '';
+
   checkoutSummary.innerHTML = `
     ${items.map(i => `
       <div class="checkout-summary-row">
@@ -452,9 +476,14 @@ function renderCheckoutSummary() {
         <span>$${(i.qty * i.price).toLocaleString()}</span>
       </div>
     `).join('')}
+    <div class="checkout-summary-row subtotal-row">
+      <span>Products</span>
+      <span>$${subtotal.toLocaleString()}</span>
+    </div>
+    ${shippingRow}
     <div class="checkout-summary-row total">
       <span>Total</span>
-      <span>$${subtotal.toLocaleString()}</span>
+      <span>$${total.toLocaleString()}${fee === null && shippingMethod ? ' + shipping' : ''}</span>
     </div>
   `;
 }
@@ -483,6 +512,8 @@ shipOptions.addEventListener('change', () => {
   } else {
     shipAvailNote.hidden = true;
   }
+
+  renderCheckoutSummary(selected.value);
 });
 
 checkoutClose.addEventListener('click', closeCheckout);
@@ -527,6 +558,8 @@ checkoutSubmit.addEventListener('click', async () => {
     id: i.id, name: i.name, price: i.price, qty: i.qty
   }));
   const subtotal = items.reduce((s, i) => s + i.qty * i.price, 0);
+  const shippingFee = getShippingFee(shippingMethod) ?? 0;
+  const grandTotal = subtotal + shippingFee;
   const notesValue = coNotes.value.trim();
 
   checkoutSubmit.disabled = true;
@@ -543,6 +576,7 @@ checkoutSubmit.addEventListener('click', async () => {
       shipping_method: shippingMethod,
       items:           items,
       subtotal:        subtotal,
+      shipping_fee:    shippingFee,
       notes:           notesValue || null,
       status:          'awaiting_payment',
     });
@@ -570,7 +604,7 @@ checkoutSubmit.addEventListener('click', async () => {
   checkoutSubmit.querySelector('span').textContent = 'Place order';
 
   closeCheckout();
-  openPaymentModal(savedOrderId, subtotal);
+  openPaymentModal(savedOrderId, grandTotal);
 });
 
 // ============ PAYMENT MODAL ============
