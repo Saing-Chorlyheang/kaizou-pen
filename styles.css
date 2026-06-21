@@ -171,6 +171,12 @@ img { max-width: 100%; display: block; }
   display: flex; align-items: center; gap: 10px;
   font-weight: 700; font-size: 18px;
 }
+.logo-img {
+  height: 40px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
 .logo-mark {
   width: 32px; height: 32px; border-radius: 8px;
   background: var(--grad);
