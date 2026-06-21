@@ -1,5 +1,6 @@
 /* ============ RESET / BASE ============ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { overflow-x: hidden; }
 
 /* HTML hidden attribute must always win over component display rules */
 [hidden] { display: none !important; }
@@ -265,7 +266,7 @@ img { max-width: 100%; display: block; }
 
 .hero-title {
   font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: clamp(64px, 10vw, 128px);
+  font-size: clamp(40px, 10vw, 128px);
   line-height: 0.9;
   letter-spacing: 0.01em;
   font-weight: 400;
@@ -439,7 +440,7 @@ img { max-width: 100%; display: block; }
 }
 .section-title {
   font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: clamp(42px, 6vw, 80px);
+  font-size: clamp(28px, 6vw, 80px);
   font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 1.0;
@@ -500,7 +501,7 @@ img { max-width: 100%; display: block; }
 /* ============ PRODUCT GRID ============ */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
   gap: 24px;
 }
 
@@ -1933,11 +1934,20 @@ body.edit-mode [data-edit-key]:focus {
 }
 
 @media (max-width: 500px) {
+  .logo-img { height: 56px; }
+  .hero { padding: 100px 16px 48px; }
+  .hero-sub { font-size: 15px; }
   .hero-stats { gap: 16px; }
   .stat-num { font-size: 22px; }
   .pen-photo-wrap { width: 220px; height: 220px; }
   .pen-photo { width: 200px; height: 200px; }
+  .section { padding: 60px 16px; }
+  .section-sub { font-size: 15px; }
+  .shop-toolbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .sort-control { width: 100%; justify-content: space-between; }
   .footer-grid { grid-template-columns: 1fr; }
+  .footer-social-links { flex-wrap: wrap; gap: 8px; }
+  .checkout-sheet { padding: 24px 16px; }
 }
 
 @media (max-width: 760px) {
