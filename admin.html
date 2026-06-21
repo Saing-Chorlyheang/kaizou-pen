@@ -55,6 +55,7 @@
   <div class="admin-body">
     <div class="admin-tabs">
       <button class="admin-tab active" data-tab="products">Products</button>
+      <button class="admin-tab" data-tab="orders">Orders <span id="ordersNewBadge" class="orders-badge" hidden></span></button>
       <button class="admin-tab" data-tab="blocks">Custom blocks</button>
     </div>
 
@@ -69,6 +70,20 @@
       </div>
 
       <div class="admin-table" id="adminTable">
+        <div class="admin-empty">Loading…</div>
+      </div>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div class="admin-tab-pane" data-pane="orders" hidden>
+      <div class="admin-toolbar">
+        <h2>Orders <span id="orderCount" class="muted"></span></h2>
+        <button class="btn btn-ghost" id="refreshOrdersBtn" title="Refresh">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          <span>Refresh</span>
+        </button>
+      </div>
+      <div class="admin-table" id="ordersTable">
         <div class="admin-empty">Loading…</div>
       </div>
     </div>

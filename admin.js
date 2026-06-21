@@ -112,6 +112,7 @@ function enterApp(user) {
   adminEmail.textContent = user.email;
   loadProducts();
   loadBlocks();
+  loadOrders();
 }
 
 // ============ TABS ============
@@ -651,6 +652,126 @@ async function deleteBlock(id) {
   }
   showToast('Block deleted');
   loadBlocks();
+}
+
+// ============ ORDERS ============
+const ordersTable      = document.getElementById('ordersTable');
+const orderCount       = document.getElementById('orderCount');
+const ordersNewBadge   = document.getElementById('ordersNewBadge');
+const refreshOrdersBtn = document.getElementById('refreshOrdersBtn');
+
+const STATUS_LABELS = {
+  awaiting_payment: '⏳ Awaiting payment',
+  confirmed:        '✅ Confirmed',
+  shipped:          '🚚 Shipped',
+  delivered:        '📦 Delivered',
+  cancelled:        '❌ Cancelled',
+};
+const STATUS_NEXT = {
+  awaiting_payment: 'confirmed',
+  confirmed:        'shipped',
+  shipped:          'delivered',
+};
+
+refreshOrdersBtn.addEventListener('click', loadOrders);
+
+async function loadOrders() {
+  ordersTable.innerHTML = `<div class="admin-empty">Loading…</div>`;
+
+  const { data, error } = await window.sb
+    .from('orders')
+    .select('*, payments(*)')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    ordersTable.innerHTML = `<div class="admin-empty" style="color:var(--accent-2)">Error: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    ordersTable.innerHTML = `<div class="admin-empty">No orders yet.</div>`;
+    orderCount.textContent = '';
+    ordersNewBadge.hidden = true;
+    return;
+  }
+
+  const awaitingCount = data.filter(o => o.status === 'awaiting_payment').length;
+  orderCount.textContent = `(${data.length})`;
+  if (awaitingCount > 0) {
+    ordersNewBadge.textContent = awaitingCount;
+    ordersNewBadge.hidden = false;
+  } else {
+    ordersNewBadge.hidden = true;
+  }
+
+  ordersTable.innerHTML = `
+    <div class="admin-row header orders-header">
+      <div>Date</div>
+      <div>Customer</div>
+      <div>Items</div>
+      <div>Payment proof</div>
+      <div>Status</div>
+      <div></div>
+    </div>
+    ${data.map(o => {
+      const date = new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const itemsSummary = (o.items || []).map(i => `${i.name} ×${i.qty}`).join(', ');
+      const proof = o.payments && o.payments[0];
+      const nextStatus = STATUS_NEXT[o.status];
+      return `
+        <div class="admin-row orders-row" data-order-id="${o.id}">
+          <div style="font-size:12px;color:var(--text-dim);white-space:nowrap;">${escapeHtml(date)}</div>
+          <div>
+            <div class="row-name">${escapeHtml(o.customer_name)}</div>
+            <div class="row-spec">${escapeHtml(o.contact)}</div>
+            <div class="row-spec" style="margin-top:2px;">${escapeHtml(o.shipping_method)}</div>
+          </div>
+          <div>
+            <div style="font-size:13px;color:var(--text-dim);">${escapeHtml(itemsSummary)}</div>
+            <div style="font-weight:600;margin-top:3px;">$${(o.subtotal || 0).toLocaleString()}</div>
+          </div>
+          <div class="order-proof-cell">
+            ${proof
+              ? `<a href="${escapeHtml(proof.screenshot_url)}" target="_blank" class="order-proof-thumb" title="View screenshot">
+                   <img src="${escapeHtml(proof.screenshot_url)}" alt="Payment proof" />
+                   <span>View</span>
+                 </a>`
+              : `<span style="color:var(--text-faint);font-size:12px;">No proof yet</span>`
+            }
+          </div>
+          <div>
+            <span class="order-status-badge status-${o.status}">${escapeHtml(STATUS_LABELS[o.status] || o.status)}</span>
+          </div>
+          <div class="row-actions">
+            ${nextStatus ? `<button class="btn btn-ghost btn-sm" data-advance="${o.id}" data-next="${nextStatus}" title="Advance status">→ ${escapeHtml(STATUS_LABELS[nextStatus].split(' ')[1])}</button>` : ''}
+            ${o.status !== 'cancelled' ? `<button class="icon-btn danger" data-cancel="${o.id}" title="Cancel order">✕</button>` : ''}
+          </div>
+        </div>`;
+    }).join('')}
+  `;
+
+  ordersTable.querySelectorAll('[data-advance]').forEach(btn => {
+    btn.addEventListener('click', () => updateOrderStatus(btn.dataset.advance, btn.dataset.next));
+  });
+  ordersTable.querySelectorAll('[data-cancel]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (confirm('Cancel this order?')) updateOrderStatus(btn.dataset.cancel, 'cancelled');
+    });
+  });
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  const { error } = await window.sb
+    .from('orders')
+    .update({ status: newStatus })
+    .eq('id', orderId);
+
+  if (error) {
+    showToast(`Error: ${error.message}`);
+    return;
+  }
+  showToast(`Order marked as ${STATUS_LABELS[newStatus] || newStatus} ✓`);
+  loadOrders();
 }
 
 // ============ INIT ============
