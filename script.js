@@ -611,7 +611,6 @@ checkoutSubmit.addEventListener('click', async () => {
 const ABA_PAYWAY_URL = 'https://link.payway.com.kh/wS464008C';
 
 const paymentOverlay  = document.getElementById('paymentOverlay');
-const paymentQrCanvas = document.getElementById('paymentQrCanvas');
 const paymentAmountLabel = document.getElementById('paymentAmountLabel');
 const paymentScreenshot  = document.getElementById('paymentScreenshot');
 const paymentUploadLabel = document.getElementById('paymentUploadLabel');
@@ -633,15 +632,6 @@ function openPaymentModal(orderId, subtotal) {
   paymentSubmit.disabled = true;
   paymentOverlay.hidden = false;
   document.body.style.overflow = 'hidden';
-
-  // Generate QR code
-  if (window.QRCode) {
-    QRCode.toCanvas(paymentQrCanvas, ABA_PAYWAY_URL, {
-      width: 220,
-      margin: 2,
-      color: { dark: '#08080f', light: '#ffffff' },
-    });
-  }
 }
 
 function closePaymentModal() {
