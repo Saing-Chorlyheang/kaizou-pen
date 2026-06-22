@@ -1,6 +1,7 @@
 /* ============ RESET / BASE ============ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { overflow-x: hidden; }
+html { overflow-x: hidden; }
+body { overflow-x: clip; }
 
 /* HTML hidden attribute must always win over component display rules */
 [hidden] { display: none !important; }
@@ -2034,7 +2035,7 @@ body.edit-mode [data-edit-key]:focus {
   border-radius: 100px;
   font-size: 14px;
   font-weight: 600;
-  z-index: 300;
+  z-index: 9999;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 12px 40px rgba(0,0,0,0.4);
 }
