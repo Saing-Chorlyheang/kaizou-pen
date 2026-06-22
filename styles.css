@@ -221,6 +221,13 @@ img { max-width: 100%; display: block; }
   background: var(--surface-2);
   border-color: var(--border-strong);
 }
+@keyframes cartPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  70%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+.cart-pop { animation: cartPop 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 .track-btn {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 14px; border-radius: 100px;

@@ -158,7 +158,7 @@ function addToCart(id, btn) {
   }
 
   renderCart();
-  showToast(`Added ${product.name}`);
+  flyToCart(btn);
 
   if (btn) {
     btn.classList.add('added');
@@ -264,6 +264,44 @@ cartCheckout.addEventListener('click', () => {
 });
 
 function showToast(msg) {}
+
+// ============ FLY TO CART ============
+function flyToCart(fromEl) {
+  const cartBtn = document.getElementById('cartBtn');
+  if (!cartBtn || !fromEl) return;
+  const from = fromEl.getBoundingClientRect();
+  const to   = cartBtn.getBoundingClientRect();
+  const fromX = from.left + from.width  / 2;
+  const fromY = from.top  + from.height / 2;
+  const toX   = to.left   + to.width    / 2;
+  const toY   = to.top    + to.height   / 2;
+
+  const ball = document.createElement('div');
+  ball.style.cssText = `position:fixed;pointer-events:none;z-index:9999;width:16px;height:16px;border-radius:50%;background:var(--accent);left:${fromX-8}px;top:${fromY-8}px;`;
+  document.body.appendChild(ball);
+
+  const duration = 650;
+  const start = performance.now();
+  const arcH  = -Math.abs(toX - fromX) * 0.5 - 60;
+
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    const x = fromX + (toX - fromX) * ease - 8;
+    const y = fromY + (toY - fromY) * ease + arcH * 4 * t * (1 - t) - 8;
+    ball.style.left    = x + 'px';
+    ball.style.top     = y + 'px';
+    ball.style.transform = `scale(${1 - t * 0.7})`;
+    ball.style.opacity = t > 0.75 ? 1 - (t - 0.75) / 0.25 : 1;
+    if (t < 1) { requestAnimationFrame(step); }
+    else {
+      ball.remove();
+      cartBtn.classList.add('cart-pop');
+      setTimeout(() => cartBtn.classList.remove('cart-pop'), 400);
+    }
+  }
+  requestAnimationFrame(step);
+}
 
 // ============ SCROLL REVEAL ============
 const io = new IntersectionObserver((entries) => {
@@ -384,7 +422,7 @@ pdpInc.addEventListener('click', () => {
 pdpAdd.addEventListener('click', () => {
   if (!pdpProduct) return;
   for (let i = 0; i < pdpQuantity; i++) addToCart(pdpProduct.id);
-  showToast(`Added ${pdpQuantity}× ${pdpProduct.name}`);
+  flyToCart(pdpAdd);
   closePdp();
 });
 
