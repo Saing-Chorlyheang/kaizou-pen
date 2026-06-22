@@ -482,6 +482,7 @@ img { max-width: 100%; display: block; }
   position: relative;
   height: 600px;
   display: grid; place-items: center;
+  overflow: hidden;
 }
 
 .orbit {
@@ -2088,6 +2089,7 @@ body.edit-mode [data-edit-key]:focus {
   .footer-grid { grid-template-columns: 1fr; }
   .footer-social-links { flex-wrap: wrap; gap: 8px; }
   .checkout-sheet { padding: 24px 16px; }
+  .orbit-1, .orbit-2 { display: none; }
 }
 
 @media (max-width: 760px) {
