@@ -242,6 +242,7 @@ function openCart() {
   cartDrawer.classList.add('open');
   cartOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+  if (toastEl) { clearTimeout(toastTimer); toastEl.classList.remove('show'); }
 }
 function closeCart() {
   cartDrawer.classList.remove('open');
