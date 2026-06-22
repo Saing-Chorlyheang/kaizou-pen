@@ -2025,7 +2025,7 @@ body.edit-mode [data-edit-key]:focus {
 /* ============ TOAST ============ */
 .toast {
   position: fixed;
-  bottom: 400px; left: 50%;
+  bottom: 200px; left: 50%;
   transform: translateX(-50%) translateY(120%);
   background: var(--text);
   color: var(--bg);
