@@ -1018,6 +1018,7 @@ img { max-width: 100%; display: block; }
   position: fixed; top: 0; right: 0;
   width: 420px; max-width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background: var(--bg-2);
   border-left: 1px solid var(--border);
   z-index: 201;
@@ -1110,7 +1111,9 @@ img { max-width: 100%; display: block; }
 
 .cart-foot {
   padding: 24px 28px;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
 .cart-total {
   display: flex; justify-content: space-between;
