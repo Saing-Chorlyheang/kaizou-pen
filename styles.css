@@ -2076,19 +2076,19 @@ body.edit-mode [data-edit-key]:focus {
 
 @media (max-width: 500px) {
   .logo-img { height: 56px; }
-  .hero { padding: 100px 16px 48px; }
+  .hero { padding: 100px 20px 48px; }
   .hero-sub { font-size: 15px; }
   .hero-stats { gap: 16px; }
   .stat-num { font-size: 22px; }
   .pen-photo-wrap { width: 220px; height: 220px; }
   .pen-photo { width: 200px; height: 200px; }
-  .section { padding: 60px 16px; }
+  .section { padding: 60px 20px; }
   .section-sub { font-size: 15px; }
   .shop-toolbar { flex-direction: column; align-items: flex-start; gap: 10px; }
   .sort-control { width: 100%; justify-content: space-between; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-social-links { flex-wrap: wrap; gap: 8px; }
-  .checkout-sheet { padding: 24px 16px; }
+  .checkout-sheet { padding: 24px 20px; }
   .orbit-1, .orbit-2 { display: none; }
 }
 
