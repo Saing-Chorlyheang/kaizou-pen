@@ -1,7 +1,6 @@
 /* ============ RESET / BASE ============ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { overflow-x: hidden; }
-body { overflow-x: clip; }
 
 /* HTML hidden attribute must always win over component display rules */
 [hidden] { display: none !important; }
@@ -118,7 +117,6 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  overflow-x: hidden;
   line-height: 1.5;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
