@@ -2035,6 +2035,9 @@ body.edit-mode [data-edit-key]:focus {
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
+  width: calc(100vw - 40px);
+  max-width: 520px;
+  text-align: center;
   z-index: 9999;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 12px 40px rgba(0,0,0,0.4);
