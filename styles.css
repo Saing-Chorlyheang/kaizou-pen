@@ -2102,14 +2102,14 @@ body.edit-mode [data-edit-key]:focus {
     border-bottom: 1px solid var(--border);
     padding: 16px;
   }
-  .pdp-main-img { min-height: 260px; max-height: none; }
+  .pdp-main-img { min-height: 220px; max-height: 260px; }
   .pdp-info {
-    overflow-y: visible;    /* no inner scroll — let the overlay handle it */
-    padding: 20px 20px 32px;
+    overflow-y: visible;
+    padding: 16px 20px 28px;
   }
-  .pdp-name { font-size: 24px; }
-  .pdp-price { font-size: 22px; margin-bottom: 16px; }
-  .pdp-desc { font-size: 14px; margin-bottom: 20px; }
+  .pdp-name { font-size: 22px; }
+  .pdp-price { font-size: 20px; margin-bottom: 12px; }
+  .pdp-desc { font-size: 13px; margin-bottom: 16px; }
   .pdp-actions { flex-wrap: wrap; }
   .pdp-add { min-width: 100%; }
 
