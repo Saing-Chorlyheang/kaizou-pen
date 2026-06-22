@@ -2045,9 +2045,7 @@ body.edit-mode [data-edit-key]:focus {
 .toast.show {
   transform: translateX(-50%) translateY(0);
 }
-.cart-overlay.open ~ .toast,
-.cart-drawer.open ~ .toast,
-body:has(.cart-overlay.open) .toast { display: none !important; }
+body.cart-open .toast { display: none !important; }
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 900px) {

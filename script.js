@@ -242,12 +242,15 @@ function openCart() {
   cartDrawer.classList.add('open');
   cartOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-  if (toastEl) { clearTimeout(toastTimer); toastEl.classList.remove('show'); }
+  document.body.classList.add('cart-open');
+  if (toastEl) { clearTimeout(toastTimer); toastEl.style.display = 'none'; }
 }
 function closeCart() {
   cartDrawer.classList.remove('open');
   cartOverlay.classList.remove('open');
   document.body.style.overflow = '';
+  document.body.classList.remove('cart-open');
+  if (toastEl) { toastEl.style.display = ''; }
 }
 
 cartBtn.addEventListener('click', openCart);
