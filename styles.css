@@ -2082,6 +2082,9 @@ body.edit-mode [data-edit-key]:focus {
   .footer-social-links { flex-wrap: wrap; gap: 8px; }
   .checkout-sheet { padding: 24px 20px; }
   .orbit-1, .orbit-2 { display: none; }
+  /* Cart: force flush-right with no overflow from 100vw scrollbar quirk */
+  .cart-drawer { left: 0; right: 0; width: auto; max-width: none; }
+  .cart-head, .cart-items { padding-left: 20px; padding-right: 20px; }
 }
 
 @media (max-width: 760px) {
