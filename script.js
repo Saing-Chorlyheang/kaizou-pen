@@ -243,14 +243,12 @@ function openCart() {
   cartOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
   document.body.classList.add('cart-open');
-  if (toastEl) { clearTimeout(toastTimer); toastEl.style.display = 'none'; }
 }
 function closeCart() {
   cartDrawer.classList.remove('open');
   cartOverlay.classList.remove('open');
   document.body.style.overflow = '';
   document.body.classList.remove('cart-open');
-  if (toastEl) { toastEl.style.display = ''; }
 }
 
 cartBtn.addEventListener('click', openCart);
@@ -265,20 +263,7 @@ cartCheckout.addEventListener('click', () => {
   openCheckout();
 });
 
-// ============ TOAST ============
-let toastEl = null;
-let toastTimer = null;
-function showToast(msg) {
-  if (!toastEl) {
-    toastEl = document.createElement('div');
-    toastEl.className = 'toast';
-    document.body.appendChild(toastEl);
-  }
-  toastEl.textContent = msg;
-  toastEl.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
-}
+function showToast(msg) {}
 
 // ============ SCROLL REVEAL ============
 const io = new IntersectionObserver((entries) => {

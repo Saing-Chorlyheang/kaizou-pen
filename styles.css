@@ -2026,28 +2026,6 @@ body.edit-mode [data-edit-key]:focus {
   .edit-bar-status { width: 100%; border-right: none; padding: 0 0 6px; margin: 0; border-bottom: 1px solid var(--border); }
 }
 
-/* ============ TOAST ============ */
-.toast {
-  position: fixed;
-  bottom: 100px; left: 50%;
-  transform: translateX(-50%) translateY(120%);
-  background: var(--text);
-  color: var(--bg);
-  padding: 14px 24px;
-  border-radius: 100px;
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  width: fit-content;
-  max-width: calc(100vw - 40px);
-  z-index: 150;
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-}
-.toast.show {
-  transform: translateX(-50%) translateY(0);
-}
-body.cart-open .toast { display: none !important; }
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 900px) {
