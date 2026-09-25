@@ -1,0 +1,54 @@
+# Keeps the free-tier Supabase project from auto-pausing (7 days idle),
+# and restores it automatically if it has been paused anyway.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # daily 00:00 UTC (07:00 Cambodia)
+  workflow_dispatch:
+
+permissions:
+  actions: write          # lets the job re-enable itself (see last step)
+
+env:
+  PROJECT_REF: jscqbthvvzmxjqcfkssx
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore project if paused
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          api="https://api.supabase.com/v1/projects/$PROJECT_REF"
+          auth="Authorization: Bearer $SUPABASE_ACCESS_TOKEN"
+          status=$(curl -fsS -H "$auth" "$api" | jq -r .status)
+          echo "status: $status"
+          if [ "$status" = "INACTIVE" ]; then
+            curl -fsS -X POST -H "$auth" "$api/restore"
+            for i in $(seq 1 40); do
+              sleep 20
+              status=$(curl -fsS -H "$auth" "$api" | jq -r .status)
+              echo "status: $status"
+              [ "$status" = "ACTIVE_HEALTHY" ] && break
+            done
+          fi
+          [ "$status" = "ACTIVE_HEALTHY" ] || { echo "::error::project not healthy ($status)"; exit 1; }
+
+      - name: Ping database via REST
+        run: |
+          anon=$(grep -oP 'SUPABASE_ANON\s*=\s*"\K[^"]+' supabase-config.js)
+          curl -fsS "https://$PROJECT_REF.supabase.co/rest/v1/products?select=*&limit=1" \
+            -H "apikey: $anon" -H "Authorization: Bearer $anon" -o /dev/null
+          echo "ping ok"
+
+      # GitHub disables scheduled workflows in public repos after 60 days
+      # without repo activity; re-enabling keeps the schedule alive.
+      - name: Keep workflow enabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow enable supabase-keepalive.yml --repo "$GITHUB_REPOSITORY"
