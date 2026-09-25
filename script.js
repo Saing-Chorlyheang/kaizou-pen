@@ -371,12 +371,37 @@ function openPdp(id) {
 }
 
 function closePdp() {
+  if (window.KZ3D) window.KZ3D.unmountPdp();
   pdpOverlay.hidden = true;
   document.body.style.overflow = '';
   pdpProduct = null;
 }
 
+// activeIndex is an image index, or '3d' for the three.js viewer (three-scene.js)
 function renderPdpGallery(imgs, activeIndex, product) {
+  const has3d = !!window.KZ3D;
+  if (has3d) window.KZ3D.unmountPdp();
+  if (has3d && (activeIndex === '3d' || imgs.length === 0)) activeIndex = '3d';
+
+  if (has3d) {
+    if (activeIndex === '3d') {
+      pdpMainImg.innerHTML = '';
+      window.KZ3D.mountPdp(pdpMainImg, product);
+    } else {
+      pdpMainImg.innerHTML = `<img src="${escapeHtml(imgs[activeIndex])}" alt="${escapeHtml(product.name)}" />`;
+    }
+    pdpThumbs.innerHTML = imgs.map((url, i) => `
+      <button class="pdp-thumb ${i === activeIndex ? 'active' : ''}" data-i="${i}" type="button">
+        <img src="${escapeHtml(url)}" alt="" />
+      </button>
+    `).join('') + `
+      <button class="pdp-thumb pdp-thumb-3d ${activeIndex === '3d' ? 'active' : ''}" data-i="3d" type="button" aria-label="360° 3D view">3D</button>`;
+    pdpThumbs.querySelectorAll('.pdp-thumb').forEach(t =>
+      t.addEventListener('click', () =>
+        renderPdpGallery(imgs, t.dataset.i === '3d' ? '3d' : +t.dataset.i, product)));
+    return;
+  }
+
   if (imgs.length === 0) {
     pdpMainImg.innerHTML = `
       <div class="placeholder-pen">
