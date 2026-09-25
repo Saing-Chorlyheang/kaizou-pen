@@ -22,11 +22,11 @@ const isDark = () => document.documentElement.getAttribute('data-theme') === 'da
 const isMobile = () => innerWidth <= 900;
 
 // ============ PEN MODEL ============
-function createPen({ body = '#f4f4f6', bandA = '#ff1478', bandB = '#12b8ff' } = {}) {
+// cap: metal tint of the end weights; grip: rubber grip section in the middle (mod style)
+function createPen({ body = '#f4f4f6', bandA = '#ff1478', bandB = '#12b8ff', cap = '#dadce2', grip = null, seg = 48 } = {}) {
   const pen = new THREE.Group();
-  const seg = 48;
   const bodyMat  = new THREE.MeshPhysicalMaterial({ color: body, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.08 });
-  const metalMat = new THREE.MeshStandardMaterial({ color: '#dadce2', metalness: 1, roughness: 0.2 });
+  const metalMat = new THREE.MeshStandardMaterial({ color: cap, metalness: 1, roughness: 0.2 });
   const darkMat  = new THREE.MeshStandardMaterial({ color: '#15151c', roughness: 0.45 });
   const bandAMat = new THREE.MeshPhysicalMaterial({ color: bandA, roughness: 0.3, clearcoat: 1 });
   const bandBMat = new THREE.MeshPhysicalMaterial({ color: bandB, roughness: 0.3, clearcoat: 1 });
@@ -48,7 +48,13 @@ function createPen({ body = '#f4f4f6', bandA = '#ff1478', bandB = '#12b8ff' } = 
   }
   cyl(0.136, 1.18, 1.36, bandAMat);                    // grip bands
   cyl(0.136, -1.36, -1.18, bandBMat);
-  cyl(0.134, -0.03, 0.03, darkMat);                    // balance mark
+  if (grip) {                                          // ribbed rubber grip
+    const gripMat = new THREE.MeshStandardMaterial({ color: grip, roughness: 0.85 });
+    cyl(0.142, -0.55, 0.55, gripMat);
+    for (const y of [-0.42, -0.14, 0.14, 0.42]) cyl(0.149, y - 0.025, y + 0.025, gripMat);
+  } else {
+    cyl(0.134, -0.03, 0.03, darkMat);                  // balance mark
+  }
 
   pen.rotation.z = Math.PI / 2;                        // lie along X
   const holder = new THREE.Group();
@@ -134,6 +140,106 @@ function createParticles(count) {
   return { points, update, applyTheme };
 }
 
+// ============ BACKGROUND MOD PENS (hero) ============
+// Mod variations — loosely based on the lineup (emboss / Menowa / PPM style)
+const MOD_STYLES = [
+  { body: '#f4f4f6', bandA: '#ff1478', bandB: '#12b8ff' },
+  { body: '#f3e21c', bandA: '#15151c', bandB: '#15151c', cap: '#1d1d24', grip: '#15151c' },
+  { body: '#16161c', bandA: '#ff4500', bandB: '#ff4500', cap: '#d9a84a' },
+  { body: '#f4f4f6', bandA: '#0057ff', bandB: '#15151c', cap: '#26262e', grip: '#0057ff' },
+  { body: '#ff4500', bandA: '#ffffff', bandB: '#ffffff' },
+  { body: '#ff5fa8', bandA: '#ffffff', bandB: '#ffffff', cap: '#e8e8ee', grip: '#2a2a33' },
+  { body: '#1f3cff', bandA: '#f3e21c', bandB: '#f3e21c', cap: '#d9a84a' },
+  { body: '#e9e9ee', bandA: '#15151c', bandB: '#ff1478', cap: '#9aa0ad', grip: '#15151c' },
+];
+
+function createBgPens(scene, camera, count) {
+  const group = new THREE.Group();
+  scene.add(group);
+  const pens = [];
+  for (let i = 0; i < count; i++) {
+    const outer = new THREE.Group();             // orientation of the spin plane
+    const pen = createPen({ ...MOD_STYLES[i % MOD_STYLES.length], seg: 24 });
+    outer.add(pen);
+    group.add(outer);
+    outer.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+    pens.push({
+      outer, pen,
+      z: 0, sx: 0, sy: 0,                        // page position (px, document coords) + depth
+      scale: lerp(0.42, 0.8, Math.random()),
+      spin: lerp(0.25, 0.9, Math.random()) * (Math.random() < 0.5 ? -1 : 1),
+      kick: 0,                                   // extra spin from the cursor
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+
+  // Keep pens off the headline/CTA and away from the main hero pen
+  const layout = () => {
+    const hero = document.querySelector('.hero');
+    const content = document.querySelector('.hero-content');
+    const visual = document.querySelector('.hero-visual');
+    if (!hero || !content) return;
+    const hr = hero.getBoundingClientRect(), cr = content.getBoundingClientRect(), vr = visual.getBoundingClientRect();
+    const top = hr.top + scrollY, h = Math.max(hr.height, innerHeight);
+    const pad = 28;
+    const free = (x, y) => {
+      const vy = y - scrollY;
+      const inText = x > cr.left - pad && x < cr.right + pad && vy > cr.top - pad && vy < cr.bottom + pad;
+      const nearHeroPen = Math.hypot(x - (vr.left + vr.width / 2), vy - (vr.top + vr.height / 2)) < 150;
+      return !inText && !nearHeroPen;
+    };
+    // Best-candidate sampling: of several free spots, take the one farthest from pens placed so far
+    const placed = [];
+    pens.forEach((p, i) => {
+      p.z = lerp(-11, -3, ((i * 0.618) % 1));      // spread depths evenly
+      let best = null, bestD = -1;
+      for (let tries = 0; tries < 60 && !(best && tries >= 15); tries++) {
+        const x = Math.random() * innerWidth, y = top + Math.random() * h;
+        if (!free(x, y)) continue;
+        const d = placed.reduce((m, q) => Math.min(m, Math.hypot(q[0] - x, q[1] - y)), Infinity);
+        if (d > bestD) { best = [x, y]; bestD = d; }
+      }
+      best ??= [Math.random() * innerWidth, top + Math.random() * h];
+      [p.sx, p.sy] = best;
+      placed.push(best);
+    });
+  };
+
+  const raycaster = new THREE.Raycaster();
+  const hover = (ndcX, ndcY) => {
+    if (!group.visible) return;
+    raycaster.setFromCamera({ x: ndcX, y: ndcY }, camera);
+    const hit = raycaster.intersectObjects(group.children, true)[0];
+    if (!hit) return;
+    const p = pens.find(p => p.outer === hit.object.parent.parent.parent);
+    if (p) p.kick = Math.max(p.kick, 9);         // flick it
+  };
+
+  const update = (dt, time, scrollY, halfH, px, py) => {
+    const worldPerPx0 = (2 * halfH) / innerHeight;
+    let anyVisible = false;
+    for (const p of pens) {
+      const depth = (CAM_Z - p.z) / CAM_Z;       // farther → bigger world area per px
+      const par = lerp(0.9, 0.55, (depth - 1.3) / 0.8);   // farther pens scroll slower
+      const screenY = p.sy - scrollY * par;
+      const k = worldPerPx0 * depth;
+      const bob = REDUCED ? 0 : Math.sin(time * 0.6 + p.phase) * 0.18;
+      p.outer.position.set(
+        (p.sx - innerWidth / 2) * k + px * 0.35 * depth,
+        -(screenY - innerHeight / 2) * k + bob - py * 0.25 * depth,
+        p.z);
+      p.outer.scale.setScalar(p.scale);
+      p.kick *= Math.pow(0.25, dt);
+      p.pen.rotation.y += (REDUCED ? 0 : p.spin + p.kick * Math.sign(p.spin)) * dt;
+      p.pen.children[0].rotation.x += (REDUCED ? 0 : 0.4) * dt;       // roll along the axis
+      if (screenY > -200 && screenY < innerHeight + 200) anyVisible = true;
+    }
+    group.visible = anyVisible;
+  };
+
+  return { layout, hover, update };
+}
+
 // ============ MAIN PAGE SCENE ============
 function initPage() {
   const heroVisual = document.querySelector('.hero-visual');
@@ -151,6 +257,13 @@ function initPage() {
 
   const particles = createParticles(isMobile() ? 450 : 1100);
   scene.add(particles.points);
+
+  // Distant pens fade into the page background (hero pen at distance 10 stays clear)
+  scene.fog = new THREE.Fog(0xffffff, CAM_Z + 1.5, CAM_Z + 14);
+  const applyFog = () => scene.fog.color.set(isDark() ? '#07070b' : '#f3f3f8');
+  applyFog();
+
+  const bgPens = createBgPens(scene, camera, isMobile() ? 7 : 14);
 
   // anchor (screen position + scale) > tilt (viewing angle) > spinner (spin) > pen
   const anchor = new THREE.Group();
@@ -177,11 +290,19 @@ function initPage() {
   resize();
   addEventListener('resize', resize);
 
+  // Re-scatter background pens only when the width changes (mobile URL bar resizes height constantly)
+  let layoutW = 0;
+  const relayout = () => { if (innerWidth !== layoutW) { layoutW = innerWidth; bgPens.layout(); } };
+  relayout();
+  addEventListener('resize', relayout);
+  document.fonts?.ready.then(() => { layoutW = 0; relayout(); });   // headline size changes once fonts load
+
   // ---- pointer parallax + drag to spin ----
   const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
   addEventListener('pointermove', e => {
     pointer.x = e.clientX / innerWidth * 2 - 1;
     pointer.y = e.clientY / innerHeight * 2 - 1;
+    if (e.pointerType === 'mouse') bgPens.hover(pointer.x, -pointer.y);
   }, { passive: true });
 
   const BASE_SPIN = REDUCED ? 0.4 : 3.2;           // rad/s
@@ -205,7 +326,7 @@ function initPage() {
     heroVisual.addEventListener('pointercancel', end);
   }
 
-  new MutationObserver(particles.applyTheme)
+  new MutationObserver(() => { particles.applyTheme(); applyFog(); })
     .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
   // ---- scroll choreography: hero → shop heading ----
@@ -265,6 +386,7 @@ function initPage() {
     particles.points.rotation.y = pointer.sx * 0.06;
     particles.points.rotation.x = pointer.sy * 0.04;
     particles.update(scrollY, time, halfH() * camera.aspect, halfH());
+    bgPens.update(dt, time, scrollY, halfH(), pointer.sx, pointer.sy);
 
     renderer.render(scene, camera);
   };
