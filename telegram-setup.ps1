@@ -8,23 +8,45 @@
 #   3. Save the token (never paste it in chat):
 #        [Environment]::SetEnvironmentVariable("TELEGRAM_BOT_TOKEN", "123:ABC...", "User")
 # Then run:  powershell -ExecutionPolicy Bypass -File .\telegram-setup.ps1
+# After editing telegram_notify.sql, apply only the SQL (keeps the saved chat):
+#   powershell -ExecutionPolicy Bypass -File .\telegram-setup.ps1 -SqlOnly
 #
 # What it does: finds your chat id, stores token + chat id in Supabase Vault,
 # installs telegram_notify.sql (triggers), and sends a test message.
 # Uses SUPABASE_ACCESS_TOKEN (already set) for the Supabase Management API.
 # ============================================================
+param([switch]$SqlOnly)
 $ErrorActionPreference = "Stop"
 $ProjectRef = "jscqbthvvzmxjqcfkssx"
 
+$sb = [Environment]::GetEnvironmentVariable("SUPABASE_ACCESS_TOKEN", "User")
+if (-not $sb) { throw "SUPABASE_ACCESS_TOKEN is not set." }
+
+function Invoke-Sql($sql) {
+  $body = @{ query = $sql } | ConvertTo-Json -Compress
+  # PowerShell 5.1 would send the body as Latin-1 and break the emoji in the SQL
+  Invoke-RestMethod -Method Post -Uri "https://api.supabase.com/v1/projects/$ProjectRef/database/query" `
+    -Headers @{ Authorization = "Bearer $sb" } -ContentType "application/json; charset=utf-8" `
+    -Body ([Text.Encoding]::UTF8.GetBytes($body)) | Out-Null
+}
+
+function Install-Triggers {
+  # ReadAllText, not Get-Content: in PS 5.1 Get-Content's string carries PSPath etc. and ConvertTo-Json emits an object
+  Invoke-Sql ([IO.File]::ReadAllText((Join-Path $PSScriptRoot "telegram_notify.sql"), [Text.Encoding]::UTF8))
+  Write-Host "Triggers installed."
+}
+
+if ($SqlOnly) { Install-Triggers; return }
+
 $bot = [Environment]::GetEnvironmentVariable("TELEGRAM_BOT_TOKEN", "User")
-$sb  = [Environment]::GetEnvironmentVariable("SUPABASE_ACCESS_TOKEN", "User")
 if (-not $bot) { throw "TELEGRAM_BOT_TOKEN is not set (see the top of this file)." }
-if (-not $sb)  { throw "SUPABASE_ACCESS_TOKEN is not set." }
 if ($bot -notmatch '^\d+:[A-Za-z0-9_-]+$') { throw "TELEGRAM_BOT_TOKEN does not look like a bot token." }
 
 # ---- 1. chat id: from TELEGRAM_CHAT_ID, or the latest chat that messaged the bot ----
 $chat = [Environment]::GetEnvironmentVariable("TELEGRAM_CHAT_ID", "User")
 if (-not $chat) {
+  $wh = (Invoke-RestMethod "https://api.telegram.org/bot$bot/getWebhookInfo").result.url
+  if ($wh) { throw "The status-button webhook is active, so the chat can't be auto-detected. Set TELEGRAM_CHAT_ID, or use -SqlOnly." }
   $updates = Invoke-RestMethod "https://api.telegram.org/bot$bot/getUpdates"
   # private chat / group → message, channel → channel_post, bot added somewhere → my_chat_member
   $chats = @($updates.result | ForEach-Object {
@@ -39,14 +61,6 @@ if (-not $chat) {
 if ($chat -notmatch '^-?\d+$') { throw "Chat id '$chat' is not numeric." }
 
 # ---- 2. store secrets in Vault + install triggers ----
-function Invoke-Sql($sql) {
-  $body = @{ query = $sql } | ConvertTo-Json -Compress
-  # PowerShell 5.1 would send the body as Latin-1 and break the emoji in the SQL
-  Invoke-RestMethod -Method Post -Uri "https://api.supabase.com/v1/projects/$ProjectRef/database/query" `
-    -Headers @{ Authorization = "Bearer $sb" } -ContentType "application/json; charset=utf-8" `
-    -Body ([Text.Encoding]::UTF8.GetBytes($body)) | Out-Null
-}
-
 $vaultSql = @"
 do `$`$
 declare s record;
@@ -63,9 +77,7 @@ end `$`$;
 Invoke-Sql $vaultSql
 Write-Host "Secrets saved to Supabase Vault."
 
-# ReadAllText, not Get-Content: in PS 5.1 Get-Content's string carries PSPath etc. and ConvertTo-Json emits an object
-Invoke-Sql ([IO.File]::ReadAllText((Join-Path $PSScriptRoot "telegram_notify.sql"), [Text.Encoding]::UTF8))
-Write-Host "Triggers installed."
+Install-Triggers
 
 # ---- 3. test message ----
 $check = [char]::ConvertFromUtf32(0x2705)   # this file is read as ANSI by PowerShell 5.1, so no literal emoji

@@ -1,9 +1,9 @@
 -- ============================================================
 -- TELEGRAM ORDER NOTIFICATIONS
 -- ------------------------------------------------------------
--- Sends a Telegram message when:
---   1. a new order is placed           (orders insert)
---   2. a payment screenshot is uploaded (payments insert)
+-- Sends ONE Telegram message per paid order: when the customer uploads the
+-- payment screenshot (payments insert), the screenshot is posted with the
+-- full order details as its caption. Unpaid orders are not announced.
 -- The bot token and chat id live in Supabase Vault as
 -- 'telegram_bot_token' / 'telegram_chat_id' (set by telegram-setup.ps1).
 -- Sending is async (pg_net) and never blocks or fails an order.
@@ -43,61 +43,68 @@ end $$;
 -- Must not be callable from the site (anon) — otherwise anyone could spam the chat via RPC
 revoke all on function public.tg_send(text, jsonb) from public, anon, authenticated;
 
--- ---------- 1. new order ----------
-create or replace function public.notify_new_order()
-returns trigger
-language plpgsql security definer
-set search_path = public
-as $$
-declare
-  lines text;
-  total integer := coalesce(new.subtotal, 0) + coalesce(new.shipping_fee, 0);
-begin
-  select string_agg(
-           '• ' || tg_esc(i->>'name') || ' × ' || coalesce(i->>'qty', '1')
-           || ' — $' || (coalesce((i->>'price')::numeric, 0) * coalesce((i->>'qty')::numeric, 1)),
-           E'\n')
-    into lines
-    from jsonb_array_elements(coalesce(new.items, '[]'::jsonb)) i;
-
-  perform tg_send('sendMessage', jsonb_build_object('text',
-       '🛒 <b>New order</b>  #' || upper(left(new.id::text, 8)) || E'\n\n'
-    || '👤 ' || tg_esc(new.customer_name) || E'\n'
-    || '📞 ' || tg_esc(new.contact) || E'\n'
-    || '📍 ' || tg_esc(new.address) || E'\n'
-    || '🚚 ' || tg_esc(new.shipping_method) || E'\n\n'
-    || coalesce(lines, '') || E'\n\n'
-    || 'Subtotal $' || coalesce(new.subtotal, 0) || '  ·  Shipping $' || coalesce(new.shipping_fee, 0) || E'\n'
-    || '<b>Total $' || total || '</b>'
-    || case when coalesce(new.notes, '') <> '' then E'\n📝 ' || tg_esc(new.notes) else '' end
-    || E'\n\n⏳ ' || replace(coalesce(new.status, 'pending'), '_', ' ')
-  ));
-  return new;
-end $$;
-
+-- No message when the order form is submitted — only once the customer
+-- has actually paid (uploaded the screenshot). Removes the old trigger.
 drop trigger if exists telegram_new_order on public.orders;
-create trigger telegram_new_order
-  after insert on public.orders
-  for each row execute function public.notify_new_order();
+drop function if exists public.notify_new_order();
 
--- ---------- 2. payment screenshot ----------
+-- ---------- paid order: details + payment screenshot in ONE message ----------
 create or replace function public.notify_payment()
 returns trigger
 language plpgsql security definer
 set search_path = public
 as $$
 declare
-  o public.orders;
+  o     public.orders;
+  lines text;
+  head  text;
+  info  text;
+  notes text := '';
+  room  integer;
 begin
   select * into o from public.orders where id = new.order_id;
 
-  perform tg_send('sendPhoto', jsonb_build_object(
-    'photo', new.screenshot_url,
-    'caption',
-         '💸 <b>Payment screenshot</b>  #' || upper(left(coalesce(new.order_id::text, '?'), 8)) || E'\n'
-      || '👤 ' || tg_esc(o.customer_name) || E'\n'
-      || '<b>Total $' || (coalesce(o.subtotal, 0) + coalesce(o.shipping_fee, 0)) || '</b>'
-  ));
+  select string_agg(
+           '• ' || tg_esc(i->>'name') || ' × ' || coalesce(i->>'qty', '1')
+           || ' — $' || (coalesce((i->>'price')::numeric, 0) * coalesce((i->>'qty')::numeric, 1)),
+           E'\n')
+    into lines
+    from jsonb_array_elements(coalesce(o.items, '[]'::jsonb)) i;
+
+  -- Layout: header / items / total / customer / notes
+  head := '✅ <b>Paid order</b>  #' || upper(left(coalesce(new.order_id::text, '?'), 8)) || E'\n\n';
+  lines := coalesce(lines, '');
+  info := E'\n\n<b>Total $' || (coalesce(o.subtotal, 0) + coalesce(o.shipping_fee, 0)) || '</b>'
+       || '  (items $' || coalesce(o.subtotal, 0) || ' + shipping $' || coalesce(o.shipping_fee, 0) || ')' || E'\n\n'
+       || '👤 ' || tg_esc(o.customer_name) || E'\n'
+       || '📞 ' || tg_esc(o.contact) || E'\n'
+       || '📍 ' || tg_esc(o.address) || E'\n'
+       || '🚚 ' || tg_esc(o.shipping_method);
+  if coalesce(o.notes, '') <> '' then notes := E'\n\n📝 ' || tg_esc(o.notes); end if;
+
+  -- Telegram photo captions max out at 1024 chars (tags count). Trim notes
+  -- first, then the item list — never the total or the customer's contact info.
+  room := 1024 - char_length(head) - char_length(info) - 7;          -- 7 = <b></b>
+  if char_length(lines) + char_length(notes) > room then
+    notes := case when room - char_length(lines) > 20
+                  then regexp_replace(left(notes, room - char_length(lines) - 2), '&[#a-z0-9]*$', '') || ' …'
+                  else '' end;
+    if char_length(lines) > room then
+      lines := regexp_replace(left(lines, room - 2), '&[#a-z0-9]*$', '') || ' …';
+    end if;
+  end if;
+
+  -- Status buttons (handled by supabase/functions/telegram-webhook; keep labels in sync)
+  perform tg_send('sendPhoto', jsonb_build_object('photo', new.screenshot_url,
+    'caption', head || '<b>' || lines || '</b>' || info || notes,
+    'reply_markup', jsonb_build_object('inline_keyboard', jsonb_build_array(
+      jsonb_build_array(
+        jsonb_build_object('text', '▶ 💳 Payment sent', 'callback_data', 'st:' || new.order_id || ':awaiting_payment'),
+        jsonb_build_object('text', '✅ Confirmed',       'callback_data', 'st:' || new.order_id || ':confirmed')),
+      jsonb_build_array(
+        jsonb_build_object('text', '🚚 On the way',      'callback_data', 'st:' || new.order_id || ':shipped'),
+        jsonb_build_object('text', '🎉 Delivered',       'callback_data', 'st:' || new.order_id || ':delivered'))
+    ))));
   return new;
 end $$;
 
