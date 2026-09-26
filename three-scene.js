@@ -1,3 +1,5 @@
+import {mountProductModel, hasProductModel} from './product-models.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 // ============================================================
 // KAIZOU PEN — three.js layer
 // ------------------------------------------------------------
@@ -20,6 +22,38 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
 const isMobile = () => innerWidth <= 900;
+
+// Use the actual catalog meshes in the homepage animation as well.
+const homepageModels = ['isuk-emboss-v3', 'menowa-emboss', 'menowa-mod', 'ivan-mod', 'menowa-st', 'ppm-mod'];
+const homepageModelCache = new Map();
+const homepageLoader = new GLTFLoader();
+function createHomepagePen(index = 0) {
+  const holder = new THREE.Group();
+  const fallback = createPen();
+  holder.add(fallback);
+  const name = homepageModels[index % homepageModels.length];
+  if (!homepageModelCache.has(name)) {
+    homepageModelCache.set(name, homepageLoader.loadAsync(new URL(`models/${name}.glb`, import.meta.url).href));
+  }
+  homepageModelCache.get(name).then(gltf => {
+    const model = gltf.scene.clone(true);
+    const bounds = new THREE.Box3().setFromObject(model);
+    const size = bounds.getSize(new THREE.Vector3());
+    const center = bounds.getCenter(new THREE.Vector3());
+    model.position.sub(center);
+    const normalized = new THREE.Group();
+    normalized.add(model);
+    normalized.scale.setScalar(PEN_LEN / size.x);
+    holder.remove(fallback);
+    fallback.traverse(object => {
+      object.geometry?.dispose();
+      if (Array.isArray(object.material)) object.material.forEach(m => m.dispose());
+      else object.material?.dispose();
+    });
+    holder.add(normalized);
+  }).catch(err => console.warn('Homepage model unavailable:', name, err));
+  return holder;
+}
 
 // ============ PEN MODEL ============
 // cap: metal tint of the end weights; grip: rubber grip section in the middle (mod style)
@@ -159,7 +193,7 @@ function createBgPens(scene, camera, count) {
   const pens = [];
   for (let i = 0; i < count; i++) {
     const outer = new THREE.Group();             // orientation of the spin plane
-    const pen = createPen({ ...MOD_STYLES[i % MOD_STYLES.length], seg: 24 });
+    const pen = createHomepagePen(i);
     outer.add(pen);
     group.add(outer);
     outer.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
@@ -211,7 +245,10 @@ function createBgPens(scene, camera, count) {
     raycaster.setFromCamera({ x: ndcX, y: ndcY }, camera);
     const hit = raycaster.intersectObjects(group.children, true)[0];
     if (!hit) return;
-    const p = pens.find(p => p.outer === hit.object.parent.parent.parent);
+    // GLB models nest deeper than the procedural pen, so walk up to the pen's outer group
+    let o = hit.object;
+    while (o && o.parent !== group) o = o.parent;
+    const p = pens.find(p => p.outer === o);
     if (p) p.kick = Math.max(p.kick, 9);         // flick it
   };
 
@@ -269,7 +306,7 @@ function initPage() {
   const anchor = new THREE.Group();
   const tilt = new THREE.Group();
   const spinner = new THREE.Group();
-  const pen = createPen();
+  const pen = createHomepagePen(0);
   spinner.add(pen);
   tilt.add(spinner);
   anchor.add(tilt);
@@ -433,7 +470,9 @@ function sampleColor(url) {
 }
 
 let pdp = null;
+let productModelCleanup = null;
 function unmountPdp() {
+  if (productModelCleanup) { productModelCleanup(); productModelCleanup = null; }
   if (!pdp) return;
   cancelAnimationFrame(pdp.raf);
   pdp.ro.disconnect();
@@ -447,6 +486,11 @@ function unmountPdp() {
 
 function mountPdp(container, product) {
   unmountPdp();
+  if (hasProductModel(product)) {
+    container.innerHTML = (product.images?.[0] ? '<img src="' + product.images[0].replaceAll('"','&quot;') + '" alt="Product photo" />' : '');
+    productModelCleanup = mountProductModel(container, product);
+    return;
+  }
   const canvas = document.createElement('canvas');
   canvas.className = 'pdp-3d-canvas';
   const hint = document.createElement('div');

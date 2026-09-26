@@ -1,0 +1,44 @@
+[
+  {
+    "id": "90d2d096-5eb2-474c-a843-17aab0d5e26c",
+    "name": "I.Suk Emboss Mod v3",
+    "file": "isuk-emboss-v3.glb",
+    "lengthMm": 250,
+    "lengthVerified": true
+  },
+  {
+    "id": "ec049e7c-d2b8-4ee1-8a1f-cef8b626ef0e",
+    "name": "Menowa* Emboss Mod",
+    "file": "menowa-emboss.glb",
+    "lengthMm": 215,
+    "lengthVerified": true
+  },
+  {
+    "id": "372bfab2-8d3b-4fd1-8e2d-0f9989f226d2",
+    "name": "Menowa*Mod",
+    "file": "menowa-mod.glb",
+    "lengthMm": 230,
+    "lengthVerified": false
+  },
+  {
+    "id": "08a59381-2d25-4cd6-a306-19576c90bea4",
+    "name": "Ivan Mod",
+    "file": "ivan-mod.glb",
+    "lengthMm": 220,
+    "lengthVerified": true
+  },
+  {
+    "id": "66791c9e-bcce-4721-9cb1-877fd43a8273",
+    "name": "Menowa*ST Mod",
+    "file": "menowa-st.glb",
+    "lengthMm": 220,
+    "lengthVerified": false
+  },
+  {
+    "id": "9964810e-bac9-460f-a29b-1d2353b81542",
+    "name": "PPM Mod",
+    "file": "ppm-mod.glb",
+    "lengthMm": 210,
+    "lengthVerified": false
+  }
+]
